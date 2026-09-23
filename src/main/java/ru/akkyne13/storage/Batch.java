@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Batch implements Editable {
+public class Batch implements Editable, StorageItem {
     private String sku;
     private String name;
     private int amount;
@@ -75,7 +75,7 @@ public class Batch implements Editable {
             errors.add("Пустой артикул");
         }
         if (name == null || name.isBlank()) {
-            errors.add("Пустое имя");
+            errors.add("Пустое наименование");
         }
         if (amount <= 0) {
             errors.add("Количество не может быть отрицательным");
