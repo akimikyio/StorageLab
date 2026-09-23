@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "ru.akkyne13.storage"
@@ -17,4 +18,9 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+javafx {
+    version = "26.0.2"
+    modules = listOf("javafx.controls") // javafx.fxml тоже нужен, если будешь верстать в SceneBuilder
 }
