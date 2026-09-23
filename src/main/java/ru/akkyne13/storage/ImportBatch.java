@@ -3,7 +3,7 @@ package ru.akkyne13.storage;
 import java.time.LocalDate;
 import java.util.List;
 
-public class ImportBatch extends Batch {
+public class ImportBatch extends Batch implements StorageItem {
     private String country;
     private String customsCode;
 
