@@ -1,6 +1,8 @@
 package ru.akkyne13.storage;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -27,6 +29,7 @@ public class StorageApp extends Application {
         importBatches.add(new ImportBatch("ОЗН501256023", "Попрыгунчик", 300, "CY1725",
                 LocalDate.of(2026, 4, 7), "China", "HZ322228"));
 
+
         VBox root = new VBox();
         HBox buttonsBox = new HBox();
 
@@ -52,7 +55,30 @@ public class StorageApp extends Application {
         TableColumn<StorageItem, String> receiptDateCol = new TableColumn<>("Дата поступления");
         receiptDateCol.setCellValueFactory(new PropertyValueFactory<>("receiptDate"));
 
-        recordsTable.getColumns().addAll(skuCol, nameCol, amountCol, cellCol, receiptDateCol);
+        TableColumn<StorageItem, String> countryCol = new TableColumn("Страна");
+        countryCol.setCellValueFactory(cellData -> {
+            StorageItem item = cellData.getValue();
+            if (item instanceof ImportBatch importBatch) {
+                return new SimpleStringProperty(importBatch.getCountry());
+            }
+
+            return new SimpleStringProperty("-");
+        });
+
+        TableColumn<StorageItem, String> customsCodeCol = new TableColumn("Таможенный код");
+        customsCodeCol.setCellValueFactory(cellData -> {
+            StorageItem item = cellData.getValue();
+            if (item instanceof ImportBatch importBatch) {
+                return new SimpleStringProperty(importBatch.getCustomsCode());
+            }
+
+            return new SimpleStringProperty("-");
+        });
+
+        recordsTable.getColumns().addAll(skuCol, nameCol, amountCol, cellCol, receiptDateCol, countryCol, customsCodeCol);
+        recordsTable.getItems().addAll(batches);
+        recordsTable.getItems().addAll(importBatches);
+
 
         buttonsBox.getChildren().addAll(loadFromCsv, saveToCsv, editRecord, addRecord);
         buttonsBox.setSpacing(10);
