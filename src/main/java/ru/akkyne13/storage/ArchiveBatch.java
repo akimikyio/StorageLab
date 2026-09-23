@@ -9,4 +9,4 @@ public record ArchiveBatch(
         String cell,
         LocalDate receiptDate,
         LocalDate archiveDate,
-        String archiveReason) { }
+        String archiveReason) implements StorageItem { }
