@@ -138,11 +138,35 @@ public class StorageApp extends Application {
                 }
         );
 
-        // TODO: написать setOnAction для каждой кнпки (для начала - тестовый)
+
+
+        loadFromCsv.setOnAction(event -> {
+           IO.println("Кликнули \"загрузить таблицу\"");
+        });
+
+        saveToCsv.setOnAction(event -> {
+            IO.println("Кликнули \"сохранить таблицу\"");
+        });
+
+        editRecord.setOnAction(event -> {
+            IO.println("Кликнули \"Редактировать запись\"");
+        });
+        addRecord.setOnAction(event -> {
+            BatchFormDialog batchFormDialog = new BatchFormDialog();
+            StorageItem createdRecord = batchFormDialog.showDialog();
+
+            if (createdRecord != null) {
+                recordsTable.getItems().add(createdRecord);
+            }
+            IO.println("Кликнули \"добавить запись\"");
+        });
+
+
+
 
         VBox.setVgrow(recordsTable, Priority.ALWAYS);
 
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1360, 760);
 
         primaryStage.setTitle("Storage App");
         primaryStage.setScene(scene);
