@@ -38,7 +38,7 @@ public class StorageApp extends Application {
 
         VBox root = new VBox();
         HBox topButtonsBox = new HBox();
-        HBox buttomButtonsBox = new HBox();
+        HBox bottomButtonsBox = new HBox();
 
         Button loadFromCsv = new Button("Загрузить из файла");
         Button saveToCsv = new Button("Сохранить в файл");
@@ -66,7 +66,7 @@ public class StorageApp extends Application {
         TableColumn<StorageItem, LocalDate> receiptDateCol = new TableColumn<>("Дата поступления");
         receiptDateCol.setCellValueFactory(new PropertyValueFactory<>("receiptDate"));
 
-        TableColumn<StorageItem, String> countryCol = new TableColumn("Страна");
+        TableColumn<StorageItem, String> countryCol = new TableColumn("Страна-отправитель");
         countryCol.setCellValueFactory(cellData -> {
             StorageItem item = cellData.getValue();
             if (item instanceof ImportBatch importBatch) {
@@ -118,11 +118,11 @@ public class StorageApp extends Application {
         topButtonsBox.getChildren().addAll(loadFromCsv, saveToCsv);
         topButtonsBox.setSpacing(10);
 
-        buttomButtonsBox.getChildren().addAll(editRecord, addRecord);
-        buttomButtonsBox.setSpacing(10);
-        buttomButtonsBox.setAlignment(Pos.CENTER_RIGHT);
+        bottomButtonsBox.getChildren().addAll(editRecord, addRecord);
+        bottomButtonsBox.setSpacing(10);
+        bottomButtonsBox.setAlignment(Pos.CENTER_RIGHT);
 
-        root.getChildren().addAll(topButtonsBox, recordsTable, buttomButtonsBox);
+        root.getChildren().addAll(topButtonsBox, recordsTable, bottomButtonsBox);
         root.setPadding(new Insets(10));
         root.setSpacing(10);
 
