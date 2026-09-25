@@ -49,7 +49,7 @@ public class ImportBatch extends Batch implements StorageItem {
         }
 
         if (customsCode == null || customsCode.isBlank()) {
-            errors.add("Пустой код страны");
+            errors.add("Пустой таможенный код");
         }
 
         return errors;
