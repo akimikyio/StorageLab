@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.List;
 
+// TODO: рефакторинг в MVC
 public class MainView extends VBox {
     public MainView() {
         HBox topButtonsBox = new HBox();
