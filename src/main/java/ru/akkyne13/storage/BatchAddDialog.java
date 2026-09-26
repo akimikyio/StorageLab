@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.util.List;
 
-public class BatchFormDialog {
+public class BatchAddDialog {
     // Поля для класса Batch
     private TextField skuField = new TextField();
     private TextField nameField = new TextField();
