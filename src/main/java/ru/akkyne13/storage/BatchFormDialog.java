@@ -10,6 +10,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class BatchFormDialog {
     // Поля для класса Batch
@@ -99,15 +100,30 @@ public class BatchFormDialog {
             }
 
             String batchType = batchTypeChooser.getValue();
+            Editable resultBatch;
 
             if (batchType.equals("Импортная партия")) {
                 country = countryField.getText();
                 customsCode = customsCodeField.getText();
 
-                resultItem = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
+                resultBatch = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
             } else {
-                resultItem = new Batch(sku, name, amount, cell, receiptDate);
+                resultBatch = new Batch(sku, name, amount, cell, receiptDate);
             }
+
+
+            List<String> errorsList = resultBatch.validate();
+            if (!errorsList.isEmpty()) {
+                String errorsText = String.join("\n", errorsList);
+                Alert warningAlert = new Alert(Alert.AlertType.WARNING);
+                warningAlert.setHeaderText(null);
+                warningAlert.setContentText(errorsText);
+                warningAlert.showAndWait();
+                return;
+            }
+
+
+            resultItem = (StorageItem) resultBatch;
 
             dialogStage.close();
         });
@@ -131,6 +147,7 @@ public class BatchFormDialog {
         Scene scene = new Scene(mainVBox);
         dialogStage.setScene(scene);
         dialogStage.showAndWait();
+
 
         return resultItem;
     }
