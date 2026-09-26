@@ -77,7 +77,7 @@ public class Batch implements Editable, StorageItem {
         if (name == null || name.isBlank()) {
             errors.add("Пустое наименование");
         }
-        if (amount <= 0) {
+        if (amount < 0) {
             errors.add("Количество не может быть отрицательным");
         }
         if (cell == null || cell.isBlank()) {
