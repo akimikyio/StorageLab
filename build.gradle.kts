@@ -22,5 +22,5 @@ tasks.test {
 
 javafx {
     version = "26.0.2"
-    modules = listOf("javafx.controls") // javafx.fxml тоже нужен, если будешь верстать в SceneBuilder
+    modules = listOf("javafx.controls")
 }
