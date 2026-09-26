@@ -22,6 +22,7 @@ import java.util.List;
 public class StorageApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
+        /*
         List<Batch> batches = new ArrayList<>();
         batches.add(new Batch("ОЗН501256023", "Попрыгунчик", 300, "CY1725", LocalDate.of(2026, 4, 7)));
         batches.add(new Batch("ОЗН234525472", "Чайник", 40, "AH2501", LocalDate.of(2026, 3, 16)));
@@ -34,139 +35,10 @@ public class StorageApp extends Application {
         archiveBatches.add(new ArchiveBatch("ОЗН234525472", "Чайник", 40, "AH2501",
                 LocalDate.of(2026, 3, 16), LocalDate.of(2026, 9, 22),
                 "Закончились товары"));
+        */
+        MainView mainView = new MainView();
 
-
-        VBox root = new VBox();
-        HBox topButtonsBox = new HBox();
-        HBox bottomButtonsBox = new HBox();
-
-        Button loadFromCsv = new Button("Загрузить из файла");
-        Button saveToCsv = new Button("Сохранить в файл");
-
-
-        Button editRecord = new Button("Изменить запись");
-        editRecord.setDisable(true);
-
-        Button addRecord = new Button("Добавить запись");
-
-        TableView<StorageItem> recordsTable = new TableView<>();
-
-        TableColumn<StorageItem, String> skuCol = new TableColumn<>("Артикул");
-        skuCol.setCellValueFactory(new PropertyValueFactory<>("sku"));
-
-        TableColumn<StorageItem, String> nameCol = new TableColumn<>("Наименование");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<StorageItem, Integer> amountCol = new TableColumn<>("Количество");
-        amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
-
-        TableColumn<StorageItem, String> cellCol = new TableColumn<>("Ячейка");
-        cellCol.setCellValueFactory(new PropertyValueFactory<>("cell"));
-
-        TableColumn<StorageItem, LocalDate> receiptDateCol = new TableColumn<>("Дата поступления");
-        receiptDateCol.setCellValueFactory(new PropertyValueFactory<>("receiptDate"));
-
-        TableColumn<StorageItem, String> countryCol = new TableColumn("Страна-отправитель");
-        countryCol.setCellValueFactory(cellData -> {
-            StorageItem item = cellData.getValue();
-            if (item instanceof ImportBatch importBatch) {
-                return new SimpleStringProperty(importBatch.getCountry());
-            }
-
-            return new SimpleStringProperty("-");
-        });
-
-        TableColumn<StorageItem, String> customsCodeCol = new TableColumn("Таможенный код");
-        customsCodeCol.setCellValueFactory(cellData -> {
-            StorageItem item = cellData.getValue();
-            if (item instanceof ImportBatch importBatch) {
-                return new SimpleStringProperty(importBatch.getCustomsCode());
-            }
-
-            return new SimpleStringProperty("-");
-        });
-
-        TableColumn<StorageItem, LocalDate> archiveDateCol = new TableColumn("Дата архивации");
-        archiveDateCol.setCellValueFactory(cellData -> {
-            StorageItem item = cellData.getValue();
-            if (item instanceof ArchiveBatch archiveBatch) {
-                return new SimpleObjectProperty(archiveBatch.archiveDate());
-            }
-
-            return new SimpleObjectProperty("-");
-        });
-
-        TableColumn<StorageItem, String> archiveReasonCol = new TableColumn("Причина архивации");
-        archiveReasonCol.setCellValueFactory(cellData -> {
-            StorageItem item = cellData.getValue();
-            if (item instanceof ArchiveBatch archiveBatch) {
-                return new SimpleStringProperty(archiveBatch.archiveReason());
-            }
-
-            return new SimpleStringProperty("-");
-        });
-
-        recordsTable.getColumns().addAll(skuCol, nameCol, amountCol,
-                cellCol, receiptDateCol, countryCol,
-                customsCodeCol, archiveDateCol, archiveReasonCol);
-
-        recordsTable.getItems().addAll(batches);
-        recordsTable.getItems().addAll(importBatches);
-        recordsTable.getItems().addAll(archiveBatches);
-
-
-        topButtonsBox.getChildren().addAll(loadFromCsv, saveToCsv);
-        topButtonsBox.setSpacing(10);
-
-        bottomButtonsBox.getChildren().addAll(editRecord, addRecord);
-        bottomButtonsBox.setSpacing(10);
-        bottomButtonsBox.setAlignment(Pos.CENTER_RIGHT);
-
-        root.getChildren().addAll(topButtonsBox, recordsTable, bottomButtonsBox);
-        root.setPadding(new Insets(10));
-        root.setSpacing(10);
-
-
-
-        recordsTable.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (newValue == null) {
-                        editRecord.setDisable(true);
-                    } else {
-                        editRecord.setDisable(!(newValue instanceof Editable));
-                    }
-                }
-        );
-
-
-
-        loadFromCsv.setOnAction(event -> {
-           IO.println("Кликнули \"загрузить таблицу\"");
-        });
-
-        saveToCsv.setOnAction(event -> {
-            IO.println("Кликнули \"сохранить таблицу\"");
-        });
-
-        editRecord.setOnAction(event -> {
-            IO.println("Кликнули \"Редактировать запись\"");
-        });
-        addRecord.setOnAction(event -> {
-            BatchFormDialog batchFormDialog = new BatchFormDialog();
-            StorageItem createdRecord = batchFormDialog.showDialog();
-
-            if (createdRecord != null) {
-                recordsTable.getItems().add(createdRecord);
-            }
-            IO.println("Кликнули \"добавить запись\"");
-        });
-
-
-
-
-        VBox.setVgrow(recordsTable, Priority.ALWAYS);
-
-        Scene scene = new Scene(root, 1360, 760);
+        Scene scene = new Scene(mainView, 1360, 760);
 
         primaryStage.setTitle("Storage App");
         primaryStage.setScene(scene);
