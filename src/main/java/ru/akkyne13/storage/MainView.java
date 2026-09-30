@@ -56,8 +56,8 @@ public class MainView extends VBox {
             IO.println("Кликнули \"Редактировать запись\"");
         });
         addRecord.setOnAction(event -> {
-            BatchAddController batchAddController = new BatchAddController();
-            StorageItem createdRecord = batchAddController.showDialog();
+            BatchFormController batchFormController = new BatchFormController();
+            StorageItem createdRecord = batchFormController.showDialog();
 
             if (createdRecord != null) {
                 recordsTable.getItems().add(createdRecord);

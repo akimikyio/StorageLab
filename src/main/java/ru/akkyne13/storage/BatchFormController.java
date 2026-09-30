@@ -1,19 +1,15 @@
 package ru.akkyne13.storage;
 
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class BatchAddController {
-    private final BatchAddView view = new BatchAddView();
+public class BatchFormController {
+    private final BatchFormView view = new BatchFormView();
     private final Stage dialogStage = new Stage();
     private StorageItem resultItem = null;
 

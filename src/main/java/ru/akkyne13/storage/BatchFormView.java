@@ -8,7 +8,7 @@ import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
 
-public class BatchAddView extends VBox {
+public class BatchFormView extends VBox {
     // Основные поля
     private final TextField skuField = new TextField();
     private final TextField nameField = new TextField();
@@ -81,7 +81,7 @@ public class BatchAddView extends VBox {
     }
 
 
-    public BatchAddView() {
+    public BatchFormView() {
         setImportFieldsDisable(true);
 
         // Создание объектов управления
