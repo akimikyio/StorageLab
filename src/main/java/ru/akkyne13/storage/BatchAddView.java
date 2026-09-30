@@ -118,11 +118,11 @@ public class BatchAddView extends VBox {
         return amountField.getText();
     }
 
-    public String getCellText() {
+    public String getCell() {
         return cellField.getText();
     }
 
-    public LocalDate getDate() {
+    public LocalDate getReceiptDate() {
         return dateField.getValue();
     }
 
