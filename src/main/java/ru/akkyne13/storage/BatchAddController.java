@@ -18,6 +18,75 @@ public class BatchAddController {
     private StorageItem resultItem = null;
 
     // TODO: Разнести функционал отображения, логики и обработки ошибок в разные функции
+    private void setupBatchTypeChooser() {
+        ComboBox<String> batchTypeChooser = view.getBatchTypeChooser();
+        batchTypeChooser.setOnAction((e) -> {
+            String currentValue = batchTypeChooser.getValue();
+
+            if (currentValue.equals("Обычная партия")) {
+                view.setImportFieldsDisable(true);
+            } else {
+                view.setImportFieldsDisable(false);
+            }
+        });
+    }
+
+    private void setupCancelButton() {
+        Button cancelButton = view.getCancelButton();
+        cancelButton.setOnAction((e) -> {
+            dialogStage.close();
+        });
+    }
+
+    // TODO: вынести сборку объекта в отдельный метод
+    private void setupSaveButton() {
+        Button saveButton = view.getSaveButton();
+        saveButton.setOnAction((e) -> {
+            String sku = view.getSku();
+            String name = view.getName();
+            String amountText = view.getAmountText();
+            String cell = view.getCell();
+            LocalDate receiptDate = view.getReceiptDate();
+            String country = null;
+            String customsCode = null;
+
+            Integer amount = parseAmount(amountText);
+            if (amount == null) {
+                return;
+            }
+
+            String batchType = view.getBatchTypeChooser().getValue();
+            Editable resultBatch;
+
+            if (batchType.equals("Импортная партия")) {
+                country = view.getCountry();
+                customsCode = view.getCustomsCode();
+
+                resultBatch = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
+            } else {
+                resultBatch = new Batch(sku, name, amount, cell, receiptDate);
+            }
+
+
+            List<String> errorsList = resultBatch.validate();
+            if (!errorsList.isEmpty()) {
+                String errorsText = String.join("\n", errorsList);
+                showErrorAlert("Ошибка ввода", errorsText);
+                return;
+            }
+
+            resultItem = (StorageItem) resultBatch;
+
+            dialogStage.close();
+        });
+    }
+
+    private void setupListeners() {
+        setupBatchTypeChooser();
+        setupCancelButton();
+        setupSaveButton();
+    }
+
     public StorageItem showDialog() {
         Stage dialogStage = new Stage();
         dialogStage.initModality(Modality.APPLICATION_MODAL);
