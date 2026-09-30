@@ -12,19 +12,9 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.util.List;
 
-public class BatchAddDialog {
-    // Поля для класса Batch
-    private TextField skuField = new TextField();
-    private TextField nameField = new TextField();
-    private TextField amountField = new TextField();
-    private TextField cellField = new TextField();
-    private DatePicker dateField = new DatePicker();
-
-    // Дополнительные поля для ImportBatch
-    private TextField countryField = new TextField();
-    private TextField customsCodeField  = new TextField();
-
-    // Переменная для хранения результата
+public class BatchAddController {
+    private final BatchAddView view = new BatchAddView();
+    private final Stage dialogStage = new Stage();
     private StorageItem resultItem = null;
 
     // TODO: Разнести функционал отображения, логики и обработки ошибок в разные функции
