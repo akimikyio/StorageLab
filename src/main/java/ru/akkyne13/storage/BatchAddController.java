@@ -60,35 +60,39 @@ public class BatchAddController {
         return amount;
     }
 
-    // TODO: вынести сборку объекта в отдельный метод
+    private Editable buildBatchFromView(Integer amount) {
+        String sku = view.getSku();
+        String name = view.getName();
+        String amountText = view.getAmountText();
+        String cell = view.getCell();
+        LocalDate receiptDate = view.getReceiptDate();
+        String country = null;
+        String customsCode = null;
+
+        String batchType = view.getBatchTypeChooser().getValue();
+        Editable resultBatch;
+
+        if (batchType.equals("Импортная партия")) {
+            country = view.getCountry();
+            customsCode = view.getCustomsCode();
+
+            resultBatch = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
+        } else {
+            resultBatch = new Batch(sku, name, amount, cell, receiptDate);
+        }
+
+        return resultBatch;
+    }
+
     private void setupSaveButton() {
         Button saveButton = view.getSaveButton();
         saveButton.setOnAction((e) -> {
-            String sku = view.getSku();
-            String name = view.getName();
-            String amountText = view.getAmountText();
-            String cell = view.getCell();
-            LocalDate receiptDate = view.getReceiptDate();
-            String country = null;
-            String customsCode = null;
-
-            Integer amount = parseAmount(amountText);
+            Integer amount = parseAmount(view.getAmountText());
             if (amount == null) {
                 return;
             }
 
-            String batchType = view.getBatchTypeChooser().getValue();
-            Editable resultBatch;
-
-            if (batchType.equals("Импортная партия")) {
-                country = view.getCountry();
-                customsCode = view.getCustomsCode();
-
-                resultBatch = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
-            } else {
-                resultBatch = new Batch(sku, name, amount, cell, receiptDate);
-            }
-
+            Editable resultBatch = buildBatchFromView(amount);
 
             List<String> errorsList = resultBatch.validate();
             if (!errorsList.isEmpty()) {
@@ -98,7 +102,6 @@ public class BatchAddController {
             }
 
             resultItem = (StorageItem) resultBatch;
-
             dialogStage.close();
         });
     }
