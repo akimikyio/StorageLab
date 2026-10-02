@@ -120,7 +120,7 @@ public class BatchFormController {
         return resultItem;
     }
 
-    private void fillViewFromItem(StorageItem item) {
+    private void fillViewFromItem() {
         view.setSku(itemToEdit.getSku());
         view.setName(itemToEdit.getName());
         view.setAmount(Integer.toString(itemToEdit.getAmount()));
@@ -143,7 +143,6 @@ public class BatchFormController {
     }
 
     public BatchFormController(StorageItem item) {
-        itemToEdit = item;
-        fillViewFromItem(itemToEdit);
+        fillViewFromItem();
     }
 }
