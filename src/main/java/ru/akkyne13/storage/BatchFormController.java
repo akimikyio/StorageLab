@@ -12,6 +12,7 @@ public class BatchFormController {
     private final BatchFormView view = new BatchFormView();
     private final Stage dialogStage = new Stage();
     private StorageItem resultItem = null;
+    private StorageItem itemToEdit = null;
 
     private void setupBatchTypeChooser() {
         ComboBox<String> batchTypeChooser = view.getBatchTypeChooser();
@@ -59,7 +60,6 @@ public class BatchFormController {
     private Editable buildBatchFromView(Integer amount) {
         String sku = view.getSku();
         String name = view.getName();
-        String amountText = view.getAmountText();
         String cell = view.getCell();
         LocalDate receiptDate = view.getReceiptDate();
         String country = null;
@@ -118,5 +118,32 @@ public class BatchFormController {
         dialogStage.showAndWait();
 
         return resultItem;
+    }
+
+    private void fillViewFromItem(StorageItem item) {
+        view.setSku(itemToEdit.getSku());
+        view.setName(itemToEdit.getName());
+        view.setAmount(Integer.toString(itemToEdit.getAmount()));
+        view.setCell(itemToEdit.getCell());
+        view.setReceiptDate(itemToEdit.getReceiptDate());
+
+        if (itemToEdit instanceof ImportBatch) {
+            view.getBatchTypeChooser().setValue("Импортная партия");
+            view.setCountry(((ImportBatch) itemToEdit).getCountry());
+            view.setCustomsCode(((ImportBatch) itemToEdit).getCustomsCode());
+        } else {
+            view.getBatchTypeChooser().setValue("Обычная партия");
+        }
+
+        view.getBatchTypeChooser().setDisable(true);
+    }
+
+    public BatchFormController() {
+
+    }
+
+    public BatchFormController(StorageItem item) {
+        itemToEdit = item;
+        fillViewFromItem(itemToEdit);
     }
 }
