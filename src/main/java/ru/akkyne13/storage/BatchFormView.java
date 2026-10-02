@@ -94,6 +94,7 @@ public class BatchFormView extends VBox {
         this.getChildren().addAll(chooserBox, editTable, buttonBox);
     }
 
+    // Getters
     public Button getSaveButton() {
         return saveButton;
     }
@@ -132,5 +133,34 @@ public class BatchFormView extends VBox {
 
     public String getCustomsCode() {
         return customsCodeField.getText();
+    }
+
+    // Setters
+    public void setSku(String sku) {
+        skuField.setText(sku);
+    }
+
+    public void setName(String name) {
+        nameField.setText(name);
+    }
+
+    public void setAmount(String amount) {
+        amountField.setText(amount);
+    }
+
+    public void setCell(String cell) {
+        cellField.setText(cell);
+    }
+
+    public void setReceiptDate(LocalDate date) {
+        dateField.setValue(date);
+    }
+
+    public void setCountry(String country) {
+        countryField.setText(country);
+    }
+
+    public void setCustomsCode(String customsCode) {
+        customsCodeField.setText(customsCode);
     }
 }
