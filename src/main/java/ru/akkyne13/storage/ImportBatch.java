@@ -13,16 +13,18 @@ public class ImportBatch extends Batch implements StorageItem {
         this.customsCode = customsCode;
     }
 
+    // Getters
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getCustomsCode() {
         return customsCode;
+    }
+
+    // Setters
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public void setCustomsCode(String customsCode) {
