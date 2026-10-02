@@ -45,15 +45,23 @@ public class MainView extends VBox {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            IO.println("Кликнули \"загрузить таблицу\"");
         });
 
         saveToCsv.setOnAction(event -> {
-            IO.println("Кликнули \"сохранить таблицу\"");
         });
 
         editRecord.setOnAction(event -> {
-            IO.println("Кликнули \"Редактировать запись\"");
+            int selectedIndex = recordsTable.getSelectionModel().getSelectedIndex();
+            StorageItem selectedItem = recordsTable.getSelectionModel().getSelectedItem();
+
+            if (selectedIndex >= 0 && selectedItem != null) {
+                BatchFormController editDialog = new BatchFormController(selectedItem);
+                StorageItem updatedRecord = editDialog.showDialog();
+
+                if (updatedRecord != null) {
+                    recordsTable.getItems().set(selectedIndex, updatedRecord);
+                }
+            }
         });
         addRecord.setOnAction(event -> {
             BatchFormController batchFormController = new BatchFormController();
