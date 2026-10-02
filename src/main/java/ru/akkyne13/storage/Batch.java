@@ -19,40 +19,43 @@ public class Batch implements Editable, StorageItem {
         this.receiptDate = receiptDate;
     }
 
+
+    // Getters
     public String getSku() {
         return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public int getAmount() {
         return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
     }
 
     public String getCell() {
         return cell;
     }
 
-    public void setCell(String cell) {
-        this.cell = cell;
-    }
-
     public LocalDate getReceiptDate() {
         return receiptDate;
+    }
+
+    // Setters
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
+    public void setCell(String cell) {
+        this.cell = cell;
     }
 
     public void setReceiptDate(LocalDate receiptDate) {

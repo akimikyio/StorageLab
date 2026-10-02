@@ -10,6 +10,8 @@ public record ArchiveBatch(
         LocalDate receiptDate,
         LocalDate archiveDate,
         String archiveReason) implements StorageItem {
+
+    // Getters
     @Override
     public String getSku() {
         return sku;
