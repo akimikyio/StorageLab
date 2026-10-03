@@ -143,6 +143,7 @@ public class BatchFormController {
     }
 
     public BatchFormController(StorageItem item) {
+        itemToEdit = item;
         fillViewFromItem();
     }
 }
