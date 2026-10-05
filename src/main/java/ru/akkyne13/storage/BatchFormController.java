@@ -34,6 +34,7 @@ public class BatchFormController {
         });
     }
 
+    // TODO: подумать над вынесением этого метода в отдельный класс показа ошибок
     private void showErrorAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
