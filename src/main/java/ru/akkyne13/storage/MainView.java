@@ -2,6 +2,7 @@ package ru.akkyne13.storage;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -42,8 +43,18 @@ public class MainView extends VBox {
             try {
                 List<StorageItem> items = CsvLoader.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
                 recordsTable.getItems().setAll(items);
+            } catch (CsvParseException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка загрузки файла");
+                alert.setHeaderText("Файл поврежден или имеет неверный формат");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
             } catch (Exception e) {
-                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Системная ошибка");
+                alert.setHeaderText("Не удалось прочитать файл");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
             }
         });
 
