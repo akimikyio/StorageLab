@@ -13,6 +13,7 @@ import java.util.List;
 
 // TODO: рефакторинг в MVC
 public class MainView extends VBox {
+
     public MainView() {
         HBox topButtonsBox = new HBox();
         HBox bottomButtonsBox = new HBox();
@@ -42,7 +43,7 @@ public class MainView extends VBox {
 
         loadFromCsv.setOnAction(event -> {
             try {
-                List<StorageItem> items = CsvLoader.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
+                List<StorageItem> items = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
                 recordsTable.getItems().setAll(items);
             } catch (CsvParseException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -54,13 +55,27 @@ public class MainView extends VBox {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Системная ошибка");
                 alert.setHeaderText("Не удалось открыть файл");
-                alert.setHeaderText("Не удалось прочитать файл");
                 alert.setContentText(e.getMessage());
                 alert.showAndWait();
             }
         });
 
         saveToCsv.setOnAction(event -> {
+            List<StorageItem> items = recordsTable.getItems();
+            try {
+                CsvStorageUtil.saveBatchesToCsv(items, "/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Сохранение данных");
+                alert.setHeaderText("Успех!");
+                alert.setContentText("Файл успешно сохранён");
+                alert.showAndWait();
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка сохранения файла");
+                alert.setHeaderText("Не удалось сохранить файл");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            }
         });
 
         editRecord.setOnAction(event -> {
