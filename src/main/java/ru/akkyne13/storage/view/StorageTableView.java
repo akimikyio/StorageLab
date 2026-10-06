@@ -1,10 +1,13 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.view;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import ru.akkyne13.storage.model.ArchiveBatch;
+import ru.akkyne13.storage.model.ImportBatch;
+import ru.akkyne13.storage.model.StorageItem;
 
 import java.time.LocalDate;
 import java.util.List;

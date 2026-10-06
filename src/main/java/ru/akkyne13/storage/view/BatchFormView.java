@@ -1,4 +1,4 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.view;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
