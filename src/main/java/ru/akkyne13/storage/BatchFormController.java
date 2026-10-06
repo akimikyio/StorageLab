@@ -34,21 +34,12 @@ public class BatchFormController {
         });
     }
 
-    // TODO: подумать над вынесением этого метода в отдельный класс показа ошибок
-    private void showErrorAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
     private Integer parseAmount(String amountText) {
         int amount = 0;
         try {
             amount = Integer.parseInt(amountText);
         } catch (NumberFormatException exception) {
-            showErrorAlert(
+            AlertUtil.showError(
                     "Ошибка ввода",
                     "В поле 'Количество' должно быть введено целое неотрицательно число"
             );
@@ -94,7 +85,7 @@ public class BatchFormController {
             List<String> errorsList = resultBatch.validate();
             if (!errorsList.isEmpty()) {
                 String errorsText = String.join("\n", errorsList);
-                showErrorAlert("Ошибка ввода", errorsText);
+                AlertUtil.showError("Ошибка ввода", errorsText);
                 return;
             }
 
