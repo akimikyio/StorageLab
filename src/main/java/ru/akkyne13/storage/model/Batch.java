@@ -1,7 +1,6 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.model;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
