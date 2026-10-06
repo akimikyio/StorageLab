@@ -1,4 +1,4 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.exception;
 
 public class CsvParseException extends Exception {
     public enum CsvErrorCode {
