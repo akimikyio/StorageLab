@@ -8,6 +8,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.io.IOException;
 import java.util.List;
 
 // TODO: рефакторинг в MVC
@@ -49,9 +50,10 @@ public class MainView extends VBox {
                 alert.setHeaderText("Файл поврежден или имеет неверный формат");
                 alert.setContentText(e.getMessage());
                 alert.showAndWait();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Системная ошибка");
+                alert.setHeaderText("Не удалось открыть файл");
                 alert.setHeaderText("Не удалось прочитать файл");
                 alert.setContentText(e.getMessage());
                 alert.showAndWait();
