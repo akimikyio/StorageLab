@@ -5,13 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CsvLoader {
+import static ru.akkyne13.storage.StorageItem.DATE_FORMATTER;
+
+public class CsvStorageUtil {
     public static List<StorageItem> loadBatchesFromCsv(String filePath) throws CsvParseException, IOException {
         Path path = Paths.get(filePath);
         List<String> lines = Files.readAllLines(path);
@@ -20,7 +20,7 @@ public class CsvLoader {
 
         for (int lineNumber = 1; lineNumber < lines.size(); lineNumber++) {
             String[] columns = lines.get(lineNumber).split(";", -1); // TODO: сделать выбор сепаратора
-            if (columns.length < 6) {
+            if (columns.length < 10) {
                 throw new CsvParseException(CsvParseException.CsvErrorCode.WRONG_COLUMN_COUNT, lineNumber+1);
             }
 
@@ -38,7 +38,7 @@ public class CsvLoader {
 
             LocalDate receiptDate = null;
             try {
-                receiptDate = LocalDate.parse(columns[5], DateTimeFormatter.ofPattern("dd.MM.yy")); // TODO: сделать выбор формата даты
+                receiptDate = LocalDate.parse(columns[5], DATE_FORMATTER); // TODO: сделать выбор формата даты
             } catch (DateTimeParseException e) {
                 throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_DATE, lineNumber + 1);
             }
@@ -49,25 +49,19 @@ public class CsvLoader {
                     Batch batch = new Batch(sku, name, amount, cell, receiptDate);
                     items.add(batch);
                     continue;
-                case "IMPORT":
-                    if (columns.length < 8) {
-                        throw new CsvParseException(CsvParseException.CsvErrorCode.WRONG_COLUMN_COUNT, lineNumber + 1);
-                    }
 
+                case "IMPORT":
                     String country = columns[6];
                     String customsCode = columns[7];
 
                     ImportBatch importBatch = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
                     items.add(importBatch);
                     continue;
-                case "ARCHIVE":
-                    if (columns.length < 10) {
-                        throw new CsvParseException(CsvParseException.CsvErrorCode.WRONG_COLUMN_COUNT, lineNumber + 1);
-                    }
 
+                case "ARCHIVE":
                     LocalDate archiveDate = null;
                     try{
-                        archiveDate = LocalDate.parse(columns[8], DateTimeFormatter.ofPattern("yy.MM.dd"));
+                        archiveDate = LocalDate.parse(columns[8], DATE_FORMATTER);
                     } catch (DateTimeParseException e) {
                         throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_DATE, lineNumber + 1);
                     }
@@ -77,11 +71,25 @@ public class CsvLoader {
                     ArchiveBatch archiveBatch = new ArchiveBatch(sku, name, amount, cell, receiptDate,  archiveDate, archiveReason);
                     items.add(archiveBatch);
                     continue;
+
                 default:
                     throw new CsvParseException(CsvParseException.CsvErrorCode.UNKNOWN_BATCH_TYPE, lineNumber+1);
             }
         }
 
         return items;
+    }
+
+    public static void saveBatchesToCsv(List<StorageItem> items, String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        List<String> lines = new ArrayList<>();
+
+        lines.add("Тип партии;Артикул;Наименование;Количество;Ячейка;Дата поступления;Страна;Таможенный код;Дата архивации;Причина архивации");
+
+        for (StorageItem item : items) {
+            lines.add(item.toCsvRow());
+        }
+
+        Files.write(path, lines);
     }
 }
