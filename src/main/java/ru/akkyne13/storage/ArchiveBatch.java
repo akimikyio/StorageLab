@@ -36,4 +36,21 @@ public record ArchiveBatch(
     public LocalDate getReceiptDate() {
         return receiptDate;
     }
+
+    @Override
+    public String toCsvRow() {
+        String formattedReceiptDate = getReceiptDate() != null ? getReceiptDate().format(DATE_FORMATTER) : "";
+        String formattedArchiveDate = archiveDate != null ? archiveDate.format(DATE_FORMATTER) : "";
+        return String.join(";",
+                "ARCHIVE",
+                getSku(),
+                getName(),
+                String.valueOf(getAmount()),
+                getCell(),
+                formattedReceiptDate,
+                "", "",
+                formattedArchiveDate,
+                archiveReason != null ? archiveReason : ""
+        );
+    }
 }

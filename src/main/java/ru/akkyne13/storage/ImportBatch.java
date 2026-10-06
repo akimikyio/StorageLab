@@ -3,7 +3,7 @@ package ru.akkyne13.storage;
 import java.time.LocalDate;
 import java.util.List;
 
-public class ImportBatch extends Batch implements StorageItem {
+public class ImportBatch extends Batch {
     private String country;
     private String customsCode;
 
@@ -55,5 +55,22 @@ public class ImportBatch extends Batch implements StorageItem {
         }
 
         return errors;
+    }
+
+    @Override
+    public String toCsvRow() {
+        String formattedReceiptDate = getReceiptDate() != null ? getReceiptDate().format(DATE_FORMATTER) : "";
+
+        return String.join(";",
+                "IMPORT",
+                getSku(),
+                getName(),
+                String.valueOf(getAmount()),
+                getCell(),
+                formattedReceiptDate,
+                country != null ? country : "",
+                customsCode != null ? customsCode : "",
+                "", ""
+        );
     }
 }

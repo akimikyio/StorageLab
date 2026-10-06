@@ -1,6 +1,7 @@
 package ru.akkyne13.storage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,7 @@ public class Batch implements Editable, StorageItem {
                 ", receiptDate: " + this.receiptDate;
     }
 
+    @Override
     public List<String> validate() {
         List<String> errors = new ArrayList<>();
 
@@ -91,5 +93,20 @@ public class Batch implements Editable, StorageItem {
         }
 
         return errors;
+    }
+
+    @Override
+    public String toCsvRow() {
+        String formattedReceiptDate = receiptDate != null ? receiptDate.format(DATE_FORMATTER) : "";
+
+        return String.join(";",
+                "NORMAL",
+                sku,
+                name,
+                String.valueOf(amount),
+                cell,
+                formattedReceiptDate,
+                "", "", "", ""
+        );
     }
 }
