@@ -1,4 +1,4 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,40 +19,43 @@ public class Batch implements Editable, StorageItem {
         this.receiptDate = receiptDate;
     }
 
+
+    // Getters
     public String getSku() {
         return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public int getAmount() {
         return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
     }
 
     public String getCell() {
         return cell;
     }
 
-    public void setCell(String cell) {
-        this.cell = cell;
-    }
-
     public LocalDate getReceiptDate() {
         return receiptDate;
+    }
+
+    // Setters
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
+    public void setCell(String cell) {
+        this.cell = cell;
     }
 
     public void setReceiptDate(LocalDate receiptDate) {
@@ -68,6 +71,7 @@ public class Batch implements Editable, StorageItem {
                 ", receiptDate: " + this.receiptDate;
     }
 
+    @Override
     public List<String> validate() {
         List<String> errors = new ArrayList<>();
 
@@ -77,7 +81,7 @@ public class Batch implements Editable, StorageItem {
         if (name == null || name.isBlank()) {
             errors.add("Пустое наименование");
         }
-        if (amount <= 0) {
+        if (amount < 0) {
             errors.add("Количество не может быть отрицательным");
         }
         if (cell == null || cell.isBlank()) {
@@ -88,5 +92,20 @@ public class Batch implements Editable, StorageItem {
         }
 
         return errors;
+    }
+
+    @Override
+    public String toCsvRow() {
+        String formattedReceiptDate = receiptDate != null ? receiptDate.format(DATE_FORMATTER) : "";
+
+        return String.join(";",
+                "NORMAL",
+                sku,
+                name,
+                String.valueOf(amount),
+                cell,
+                formattedReceiptDate,
+                "", "", "", ""
+        );
     }
 }

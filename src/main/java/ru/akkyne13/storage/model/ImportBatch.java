@@ -1,9 +1,9 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.model;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class ImportBatch extends Batch implements StorageItem {
+public class ImportBatch extends Batch {
     private String country;
     private String customsCode;
 
@@ -13,16 +13,18 @@ public class ImportBatch extends Batch implements StorageItem {
         this.customsCode = customsCode;
     }
 
+    // Getters
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getCustomsCode() {
         return customsCode;
+    }
+
+    // Setters
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public void setCustomsCode(String customsCode) {
@@ -49,9 +51,26 @@ public class ImportBatch extends Batch implements StorageItem {
         }
 
         if (customsCode == null || customsCode.isBlank()) {
-            errors.add("Пустой код страны");
+            errors.add("Пустой таможенный код");
         }
 
         return errors;
+    }
+
+    @Override
+    public String toCsvRow() {
+        String formattedReceiptDate = getReceiptDate() != null ? getReceiptDate().format(DATE_FORMATTER) : "";
+
+        return String.join(";",
+                "IMPORT",
+                getSku(),
+                getName(),
+                String.valueOf(getAmount()),
+                getCell(),
+                formattedReceiptDate,
+                country != null ? country : "",
+                customsCode != null ? customsCode : "",
+                "", ""
+        );
     }
 }
