@@ -46,17 +46,9 @@ public class MainView extends VBox {
                 List<StorageItem> items = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
                 recordsTable.getItems().setAll(items);
             } catch (CsvParseException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Ошибка загрузки файла");
-                alert.setHeaderText("Файл поврежден или имеет неверный формат");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                AlertUtil.showError("Ошибка загрузки файла", "Файл поврежден или имеет неверный формат");
             } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Системная ошибка");
-                alert.setHeaderText("Не удалось открыть файл");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                AlertUtil.showError("Системная ошибка", "Не удалось открыть файл");
             }
         });
 
@@ -64,17 +56,9 @@ public class MainView extends VBox {
             List<StorageItem> items = recordsTable.getItems();
             try {
                 CsvStorageUtil.saveBatchesToCsv(items, "/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Сохранение данных");
-                alert.setHeaderText("Успех!");
-                alert.setContentText("Файл успешно сохранён");
-                alert.showAndWait();
+                AlertUtil.showInfo("Сохранение данных","Файл успешно сохранён");
             } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Ошибка сохранения файла");
-                alert.setHeaderText("Не удалось сохранить файл");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                AlertUtil.showError("Ошибка сохранения файла", "Не удалось сохранить файл");
             }
         });
 
