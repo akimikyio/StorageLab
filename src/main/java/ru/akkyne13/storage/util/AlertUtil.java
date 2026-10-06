@@ -1,4 +1,4 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.util;
 
 import javafx.scene.control.Alert;
 

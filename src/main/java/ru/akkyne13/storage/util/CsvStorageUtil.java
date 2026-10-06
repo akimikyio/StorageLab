@@ -1,4 +1,10 @@
-package ru.akkyne13.storage;
+package ru.akkyne13.storage.util;
+
+import ru.akkyne13.storage.exception.CsvParseException;
+import ru.akkyne13.storage.model.ArchiveBatch;
+import ru.akkyne13.storage.model.Batch;
+import ru.akkyne13.storage.model.ImportBatch;
+import ru.akkyne13.storage.model.StorageItem;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +15,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.akkyne13.storage.StorageItem.DATE_FORMATTER;
+import static ru.akkyne13.storage.model.StorageItem.DATE_FORMATTER;
 
 public class CsvStorageUtil {
     public static List<StorageItem> loadBatchesFromCsv(String filePath) throws CsvParseException, IOException {
