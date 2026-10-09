@@ -12,6 +12,7 @@ import ru.akkyne13.storage.model.StorageItem;
 import ru.akkyne13.storage.view.BatchFormView;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BatchFormController {
@@ -45,10 +46,6 @@ public class BatchFormController {
         try {
             amount = Integer.parseInt(amountText);
         } catch (NumberFormatException exception) {
-            AlertUtil.showError(
-                    "Ошибка ввода",
-                    "В поле 'Количество' должно быть введено целое неотрицательно число"
-            );
             return null;
         }
 
@@ -81,16 +78,19 @@ public class BatchFormController {
     private void setupSaveButton() {
         Button saveButton = view.getSaveButton();
         saveButton.setOnAction((e) -> {
+            List<String> errors = new ArrayList<>();
+
             Integer amount = parseAmount(view.getAmountText());
             if (amount == null) {
-                return;
+                errors.add("Пустое количество");
             }
 
-            Editable resultBatch = buildBatchFromView(amount);
+            Editable resultBatch = buildBatchFromView(amount == null ? 0 : amount);
 
-            List<String> errorsList = resultBatch.validate();
-            if (!errorsList.isEmpty()) {
-                String errorsText = String.join("\n", errorsList);
+            errors.addAll(resultBatch.validate());
+
+            if (!errors.isEmpty()) {
+                String errorsText = String.join("\n", errors);
                 AlertUtil.showError("Ошибка ввода", errorsText);
                 return;
             }
