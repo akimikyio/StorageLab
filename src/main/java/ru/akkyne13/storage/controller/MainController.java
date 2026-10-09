@@ -3,6 +3,7 @@ package ru.akkyne13.storage.controller;
 import javafx.scene.control.Button;
 import ru.akkyne13.storage.util.AlertUtil;
 import ru.akkyne13.storage.exception.CsvParseException;
+import ru.akkyne13.storage.util.CsvLoadResult;
 import ru.akkyne13.storage.util.CsvStorageUtil;
 import ru.akkyne13.storage.model.Editable;
 import ru.akkyne13.storage.model.StorageItem;
@@ -74,10 +75,19 @@ public class MainController {
 
         loadFromCsvButton.setOnAction(event -> {
             try {
-                List<StorageItem> items = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
-                recordsTable.getItems().setAll(items);
-            } catch (CsvParseException e) {
-                AlertUtil.showError("Ошибка загрузки файла", "Файл поврежден или имеет неверный формат");
+                CsvLoadResult csvLoadResult = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
+                recordsTable.getItems().setAll(csvLoadResult.validItems());
+
+                if (!csvLoadResult.validItems().isEmpty()) {
+                    StringBuilder warningMessage = new StringBuilder();
+                    warningMessage.append("Файл загружен частично. Пропущены битые строки:\n");
+                    for (CsvParseException error : csvLoadResult.errors()) {
+                        warningMessage.append(error.getMessage()).append("\n");
+                    }
+
+                    AlertUtil.showWarning("Ошибки чтения", warningMessage.toString());
+                }
+
             } catch (IOException e) {
                 AlertUtil.showError("Системная ошибка", "Не удалось открыть файл");
             }
