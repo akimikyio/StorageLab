@@ -78,7 +78,7 @@ public class MainController {
                 CsvLoadResult csvLoadResult = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
                 recordsTable.getItems().setAll(csvLoadResult.validItems());
 
-                if (!csvLoadResult.validItems().isEmpty()) {
+                if (!csvLoadResult.errors().isEmpty()) {
                     StringBuilder warningMessage = new StringBuilder();
                     warningMessage.append("Файл загружен частично. Пропущены битые строки:\n");
                     for (CsvParseException error : csvLoadResult.errors()) {
