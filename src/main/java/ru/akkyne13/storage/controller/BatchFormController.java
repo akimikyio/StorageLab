@@ -129,6 +129,7 @@ public class BatchFormController {
             view.getBatchTypeChooser().setValue("Импортная партия");
             view.setCountry(((ImportBatch) itemToEdit).getCountry());
             view.setCustomsCode(((ImportBatch) itemToEdit).getCustomsCode());
+            view.setImportFieldsDisable(false);
         } else {
             view.getBatchTypeChooser().setValue("Обычная партия");
         }
