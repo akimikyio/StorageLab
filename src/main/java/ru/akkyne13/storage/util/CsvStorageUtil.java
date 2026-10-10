@@ -18,6 +18,70 @@ import java.util.List;
 import static ru.akkyne13.storage.model.StorageItem.DATE_FORMATTER;
 
 public class CsvStorageUtil {
+    private CsvStorageUtil() {} // класс утилитарный, объекты создавать нельзя
+    private enum BatchType {
+        NORMAL,
+        IMPORT,
+        ARCHIVE
+    }
+
+    private static int parseAmount(String amountString, int lineNumber) throws CsvParseException {
+        try {
+            return Integer.parseInt(amountString);
+        } catch (NumberFormatException e) {
+            throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_NUMBER, lineNumber);
+        }
+    }
+
+    private static LocalDate parseDate(String dateString, int lineNumber) throws CsvParseException {
+        if (dateString == null || dateString.isBlank()) {
+            return null;
+        }
+
+        try {
+            return LocalDate.parse(dateString, DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_DATE, lineNumber);
+        }
+    }
+
+    private static StorageItem parseLine(String line, int lineNumber) throws CsvParseException {
+        String[] columns = line.split(";", -1); // TODO: сделать выбор сепаратора
+        if (columns.length < 10) {
+            throw new CsvParseException(CsvParseException.CsvErrorCode.WRONG_COLUMN_COUNT, lineNumber);
+        }
+
+        BatchType batchType;
+        try {
+            batchType = BatchType.valueOf(columns[0]);
+        } catch (IllegalArgumentException e) {
+            throw new CsvParseException(CsvParseException.CsvErrorCode.UNKNOWN_BATCH_TYPE, lineNumber);
+        }
+
+        String sku = columns[1];
+        String name = columns[2];
+        int amount = parseAmount(columns[3], lineNumber);
+        String cell =  columns[4];
+        LocalDate receiptDate = parseDate(columns[5], lineNumber);
+
+        return switch (batchType) {
+            case NORMAL -> new Batch(sku, name, amount, cell, receiptDate);
+
+            case IMPORT -> {
+                String country = columns[6];
+                String city = columns[7];
+                yield new ImportBatch(sku, name, amount, cell, receiptDate, country, city);
+            }
+
+            case ARCHIVE -> {
+                LocalDate archiveDate = parseDate(columns[8], lineNumber);
+                String archiveReason = columns[9];
+                yield new ArchiveBatch(sku, name, amount, cell, receiptDate, archiveDate, archiveReason);
+            }
+        };
+    }
+
+
     public static CsvLoadResult loadBatchesFromCsv(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         List<String> lines = Files.readAllLines(path);
@@ -27,63 +91,10 @@ public class CsvStorageUtil {
 
         for (int lineNumber = 1; lineNumber < lines.size(); lineNumber++) {
             try {
-                String[] columns = lines.get(lineNumber).split(";", -1); // TODO: сделать выбор сепаратора
-                if (columns.length < 10) {
-                    throw new CsvParseException(CsvParseException.CsvErrorCode.WRONG_COLUMN_COUNT, lineNumber+1);
-                }
-
-                String sku = columns[1];
-                String name = columns[2];
-
-                int amount = 0;
-                try {
-                    amount = Integer.parseInt(columns[3]);
-                } catch (NumberFormatException e) {
-                    throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_NUMBER, lineNumber + 1);
-                }
-
-                String cell =  columns[4];
-
-                LocalDate receiptDate = null;
-                try {
-                    receiptDate = LocalDate.parse(columns[5], DATE_FORMATTER); // TODO: сделать выбор формата даты
-                } catch (DateTimeParseException e) {
-                    throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_DATE, lineNumber + 1);
-                }
-
-                // TODO: ввынести функционал создания партии в отдельную функцию
-                switch (columns[0]) {
-                    case "NORMAL":
-                        Batch batch = new Batch(sku, name, amount, cell, receiptDate);
-                        validItems.add(batch);
-                        continue;
-
-                    case "IMPORT":
-                        String country = columns[6];
-                        String customsCode = columns[7];
-
-                        ImportBatch importBatch = new ImportBatch(sku, name, amount, cell, receiptDate, country, customsCode);
-                        validItems.add(importBatch);
-                        continue;
-
-                    case "ARCHIVE":
-                        LocalDate archiveDate = null;
-                        try{
-                            archiveDate = LocalDate.parse(columns[8], DATE_FORMATTER);
-                        } catch (DateTimeParseException e) {
-                            throw new CsvParseException(CsvParseException.CsvErrorCode.BAD_DATE, lineNumber + 1);
-                        }
-
-                        String archiveReason = columns[9];
-
-                        ArchiveBatch archiveBatch = new ArchiveBatch(sku, name, amount, cell, receiptDate,  archiveDate, archiveReason);
-                        validItems.add(archiveBatch);
-                        continue;
-
-                    default:
-                        throw new CsvParseException(CsvParseException.CsvErrorCode.UNKNOWN_BATCH_TYPE, lineNumber+1);
-                }
-            } catch (CsvParseException e) { // TODO: сделать вывод списка битых строк визуально
+                StorageItem item = parseLine(lines.get(lineNumber), lineNumber + 1);
+                validItems.add(item);
+            }
+            catch (CsvParseException e) {
                 errorMessages.add(e);
             }
         }
