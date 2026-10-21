@@ -145,6 +145,15 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
+    public synchronized void clear() {
+        table = (Entry<K, V>[]) new Entry[INITIAL_CAPACITY];
+        size = 0;
+        lastProbes = new int[INITIAL_CAPACITY];
+        lastProbesCount = 0;
+    }
+
+    @SuppressWarnings("unchecked")
     private synchronized void resize() {
         Entry<K, V>[] oldTable = table;
 
@@ -176,6 +185,18 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
                 snapshot[i] = "__DELETED__";
             } else {
                 snapshot[i] = table[i].key.toString();
+            }
+        }
+        return snapshot;
+    }
+
+    @Override
+    public synchronized Object[] getValuesSnapshot() {
+        Object[] snapshot = new Object[size];
+        int i = 0;
+        for (Entry<K, V> entry : table) {
+            if (entry != null && !entry.isDeleted) {
+                snapshot[i++] = entry.value;
             }
         }
         return snapshot;
