@@ -14,13 +14,19 @@ public class MainView extends VBox {
     private final Button addRecordButton = new Button("Добавить запись");
     private final StorageTableView recordsTable = new StorageTableView();
 
-    public MainView() {
-        HBox topButtonsBox = new HBox();
-        HBox bottomButtonsBox = new HBox();
+    HBox createTopButtonsBox() {
+        return new HBox(loadFromCsvButton, saveToCsvButton);
+    }
 
-        topButtonsBox.getChildren().addAll(loadFromCsvButton, saveToCsvButton);
-        bottomButtonsBox.getChildren().addAll(editRecordButton, addRecordButton);
+    HBox createBottomButtonsBox() {
+        HBox bottomButtonsBox = new HBox(editRecordButton, addRecordButton);
         bottomButtonsBox.setAlignment(Pos.CENTER_RIGHT);
+        return bottomButtonsBox;
+    }
+
+    public MainView() {
+        HBox topButtonsBox = createTopButtonsBox();
+        HBox bottomButtonsBox = createBottomButtonsBox();
 
         this.setPadding( new Insets(10));
         this.setSpacing(10);
