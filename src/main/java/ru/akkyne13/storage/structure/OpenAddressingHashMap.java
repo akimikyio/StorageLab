@@ -1,7 +1,5 @@
 package ru.akkyne13.storage.structure;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
     private static class Entry<K, V> {
@@ -22,17 +20,38 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
     private Entry<K, V>[] table;
     private int size;
 
-    private final List<Integer> lastProbes = new ArrayList<>();
+    private int[] lastProbes;
+    private int lastProbesCount;
 
     @SuppressWarnings("unchecked")
     public OpenAddressingHashMap() {
         table = (Entry<K, V>[]) new Entry[INITIAL_CAPACITY];
         size = 0;
+
+        this.lastProbes = new int[INITIAL_CAPACITY];
+        this.lastProbesCount = 0;
     }
 
+    private void clearProbes() {
+        this.lastProbesCount = 0;
+    }
+
+    private void addProbe(int index) {
+        if (lastProbesCount < lastProbes.length) {
+            lastProbes[lastProbesCount] = index;
+            lastProbesCount++;
+        }
+    }
+
+
     @Override
-    public synchronized List<Integer> getLastProbes() {
-        return List.copyOf(lastProbes);
+    public synchronized boolean[] getLastProbes() {
+        boolean[] probes = new boolean[table.length];
+        for (int i = 0; i < lastProbesCount; i++) {
+            int visitedIndex = lastProbes[i];
+            probes[visitedIndex] = true;
+        }
+        return probes;
     }
 
     private int hash(K key, int capacity) {
@@ -54,13 +73,13 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
             resize();
         }
 
-        lastProbes.clear();
+        clearProbes();
 
         int index = hash(key);
         int firstDeletedIndex = -1;
 
         while(table[index] != null) {
-            lastProbes.add(index);
+            addProbe(index);
 
             if (!table[index].isDeleted && table[index].key.equals(key)) {
                 table[index].value = value;
@@ -74,7 +93,7 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
             index = (index + 1) % table.length;
         }
 
-        lastProbes.add(index);
+        addProbe(index);
 
         int targetIndex = (firstDeletedIndex != -1) ? firstDeletedIndex : index;
 
@@ -84,12 +103,12 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
 
     @Override
     public synchronized V get(K key) {
-        lastProbes.clear();
+        clearProbes();
 
         int index = hash(key);
 
         while(table[index] != null) {
-            lastProbes.add(index);
+            addProbe(index);
 
             if (!table[index].isDeleted && table[index].key.equals(key)) {
                 return table[index].value;
@@ -98,18 +117,18 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
             index = (index + 1) % table.length;
         }
 
-        lastProbes.add(index);
+        addProbe(index);
 
         return null;
     }
 
     @Override
     public synchronized boolean delete(K key) {
-        lastProbes.clear();
+        clearProbes();
         int index = hash(key);
 
         while (table[index] != null) {
-            lastProbes.add(index);
+            addProbe(index);
 
             if (!table[index].isDeleted && table[index].key.equals(key)) {
                 table[index].isDeleted = true;
@@ -121,7 +140,7 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
             index = (index + 1) % table.length;
         }
 
-        lastProbes.add(index);
+        addProbe(index);
         return false;
     }
 
@@ -144,6 +163,7 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
         }
 
         this.table = newTable;
+        this.lastProbes = new int[newCapacity];
     }
 
     @Override
