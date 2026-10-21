@@ -26,6 +26,7 @@ public class GenerateDataTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         long timestamp = System.currentTimeMillis() % 100000;
+        int updateStep = Math.max(1, recordsToGenerate / 100);
 
         for (int i = 0; i < recordsToGenerate; i++) {
             if (isCancelled()) {
@@ -37,8 +38,10 @@ public class GenerateDataTask extends Task<Void> {
             StorageItem item = StorageItemFactory.createRandomItem(i, sku);
 
             storage.put(sku, item);
-            updateProgress(i + 1, recordsToGenerate);
-            updateMessage(String.format("Сгенерировано %d из %d", i + 1, recordsToGenerate));
+            if (i % updateStep == 0 || i == recordsToGenerate - 1) {
+                updateProgress(i + 1, recordsToGenerate);
+                updateMessage(String.format("Сгенерировано %d из %d", i + 1, recordsToGenerate));
+            }
 
             if (isDelayEnabled) {
                 Thread.sleep(5);
