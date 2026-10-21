@@ -1,5 +1,6 @@
 package ru.akkyne13.storage.task;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import ru.akkyne13.storage.model.StorageItem;
 import ru.akkyne13.storage.structure.StorageMap;
@@ -9,18 +10,16 @@ public class GenerateDataTask extends Task<Void> {
     private final int recordsToGenerate;
     private final StorageMap<String, StorageItem> storage;
     private final boolean isDelayEnabled;
+    private final boolean isAnimationEnabled;
+    private final Runnable onUpdateUi;
 
 
-    public GenerateDataTask(int recordsToGenerate, StorageMap<String, StorageItem> storage) {
-        this.recordsToGenerate = recordsToGenerate;
-        this.storage = storage;
-        this.isDelayEnabled = false;
-    }
-
-    public GenerateDataTask(int recordsToGenerate, StorageMap<String, StorageItem> storage, boolean isDelayEnabled) {
+    public GenerateDataTask(int recordsToGenerate, StorageMap<String, StorageItem> storage, boolean isDelayEnabled, boolean isAnimationEnabled, Runnable onUpdateUi) {
         this.recordsToGenerate = recordsToGenerate;
         this.storage = storage;
         this.isDelayEnabled = isDelayEnabled;
+        this.isAnimationEnabled = isAnimationEnabled;
+        this.onUpdateUi = onUpdateUi;
     }
 
     @Override
@@ -43,8 +42,14 @@ public class GenerateDataTask extends Task<Void> {
                 updateMessage(String.format("Сгенерировано %d из %d", i + 1, recordsToGenerate));
             }
 
+            if (isAnimationEnabled && onUpdateUi != null) {
+                if (isDelayEnabled || i % Math.max(1, recordsToGenerate / 50) == 0) {
+                    Platform.runLater(onUpdateUi);
+                }
+            }
+
             if (isDelayEnabled) {
-                Thread.sleep(5);
+                Thread.sleep(50);
             }
         }
         return null;
