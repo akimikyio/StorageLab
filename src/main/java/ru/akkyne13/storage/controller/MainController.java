@@ -1,9 +1,11 @@
 package ru.akkyne13.storage.controller;
 
+import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import ru.akkyne13.storage.structure.OpenAddressingHashMap;
 import ru.akkyne13.storage.structure.StorageMap;
 import ru.akkyne13.storage.task.GenerateDataTask;
+import ru.akkyne13.storage.task.LoadCsvTask;
 import ru.akkyne13.storage.util.AlertUtil;
 import ru.akkyne13.storage.exception.CsvParseException;
 import ru.akkyne13.storage.util.CsvLoadResult;
@@ -39,13 +41,16 @@ public class MainController {
     private void setupEditRecordsButtonState() {
         StorageTableView recordsTable = view.getRecordsTable();
         Button editRecordButton = view.getEditRecordButton();
+        Button deleteRecordButton = view.getDeleteRecordButton();
 
         recordsTable.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (newValue == null) {
                         editRecordButton.setDisable(true);
+                        deleteRecordButton.setDisable(true);
                     } else {
                         editRecordButton.setDisable(!(newValue instanceof Editable));
+                        deleteRecordButton.setDisable(false);
                     }
                 }
         );
@@ -91,33 +96,42 @@ public class MainController {
         });
     }
 
+    private void setupDeleteRecordButton() {
+        Button deleteRecordButton = view.getDeleteRecordButton();
+        StorageTableView recordsTable = view.getRecordsTable();
+
+        deleteRecordButton.setOnAction(event -> {
+            StorageItem selectedItem = recordsTable.getSelectionModel().getSelectedItem();
+
+            if (selectedItem != null) {
+                storage.delete(selectedItem.getSku());
+                refreshTable();
+            }
+        });
+    }
+
     private void setupLoadFromCsvButton() {
         Button loadFromCsvButton = view.getLoadFromCsvButton();
 
         loadFromCsvButton.setOnAction(event -> {
-            try {
-                CsvLoadResult csvLoadResult = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
-                storage.clear();
+            LoadCsvTask task = new LoadCsvTask("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv", storage);
+            bindTaskToUI(task);
 
-                for (StorageItem item : csvLoadResult.validItems()) {
-                    storage.put(item.getSku(), item);
-                }
-
-                refreshTable();
-
-                if (csvLoadResult.errors().length > 0) {
+            task.addEventHandler(javafx.concurrent.WorkerStateEvent.WORKER_STATE_SUCCEEDED, e -> {
+                CsvLoadResult result = task.getValue();
+                if (result != null && result.errors().length > 0) {
                     StringBuilder warningMessage = new StringBuilder();
                     warningMessage.append("Файл загружен частично. Пропущены битые строки:\n");
-                    for (CsvParseException error : csvLoadResult.errors()) {
+                    for (CsvParseException error : result.errors()) {
                         warningMessage.append(error.getMessage()).append("\n");
                     }
-
                     AlertUtil.showWarning("Ошибки чтения", warningMessage.toString());
                 }
+            });
 
-            } catch (IOException e) {
-                AlertUtil.showError("Системная ошибка", "Не удалось открыть файл");
-            }
+            Thread backgroundThread = new Thread(task);
+            backgroundThread.setDaemon(true);
+            backgroundThread.start();
         });
     }
 
@@ -141,6 +155,32 @@ public class MainController {
         });
     }
 
+    private void bindTaskToUI(Task<?> task) {
+        view.getGenerateButton().setDisable(true);
+        view.getLoadFromCsvButton().setDisable(true);
+        view.getCancelTaskButton().setDisable(false);
+
+        view.getProgressBar().progressProperty().bind(task.progressProperty());
+
+        view.getCancelTaskButton().setOnAction(e -> task.cancel());
+
+        task.setOnSucceeded(e -> cleanupTaskUI());
+        task.setOnFailed(e -> {
+            cleanupTaskUI();
+            AlertUtil.showError("Сбой", "Произошла ошибка при выполнении фоновой задачи.");
+        });
+        task.setOnCancelled(e -> cleanupTaskUI());
+    }
+
+    private void cleanupTaskUI() {
+        view.getGenerateButton().setDisable(false);
+        view.getLoadFromCsvButton().setDisable(false);
+        view.getCancelTaskButton().setDisable(true);
+        view.getProgressBar().progressProperty().unbind();
+        view.getProgressBar().setProgress(0);
+        refreshTable();
+    }
+
     private void setupGenerateButton() {
         Button generateButton = view.getGenerateButton();
 
@@ -153,23 +193,13 @@ public class MainController {
                 return;
             }
 
+            boolean delay = view.getDelayCheckBox().isSelected();
+            boolean animate = view.getAnimateCheckBox().isSelected();
+
             generateButton.setDisable(true);
 
-            GenerateDataTask task = new GenerateDataTask(count, storage, false);
-            view.getProgressBar().progressProperty().bind(task.progressProperty());
-
-            task.setOnSucceeded(e -> {
-                refreshTable();
-                generateButton.setDisable(false);
-                view.getProgressBar().progressProperty().unbind();
-                view.getProgressBar().setProgress(0);
-                AlertUtil.showInfo("Успех", "Успешно сгенерировано " + count + " записей");
-            });
-
-            task.setOnFailed(e -> {
-                generateButton.setDisable(false);
-                AlertUtil.showError("Ошибка", "Сбой при генерации данных");
-            });
+            GenerateDataTask task = new GenerateDataTask(count, storage, delay, animate, this::refreshTable);
+            bindTaskToUI(task);
 
             Thread backgroundThread = new Thread(task);
             backgroundThread.setDaemon(true);
@@ -182,6 +212,7 @@ public class MainController {
         setupEditRecordsButtonState();
         setupEditRecordButton();
         setupAddRecordButton();
+        setupDeleteRecordButton();
         setupLoadFromCsvButton();
         setupSaveToCsvButton();
         setupGenerateButton();
