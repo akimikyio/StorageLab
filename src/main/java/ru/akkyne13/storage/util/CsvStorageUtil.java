@@ -6,19 +6,22 @@ import ru.akkyne13.storage.model.Batch;
 import ru.akkyne13.storage.model.ImportBatch;
 import ru.akkyne13.storage.model.StorageItem;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import static ru.akkyne13.storage.model.StorageItem.DATE_FORMATTER;
 
 public class CsvStorageUtil {
-    private CsvStorageUtil() {} // класс утилитарный, объекты создавать нельзя
+    private CsvStorageUtil() {
+    } // класс утилитарный, объекты создавать нельзя
+
     private enum BatchType {
         NORMAL,
         IMPORT,
@@ -61,7 +64,7 @@ public class CsvStorageUtil {
         String sku = columns[1];
         String name = columns[2];
         int amount = parseAmount(columns[3], lineNumber);
-        String cell =  columns[4];
+        String cell = columns[4];
         LocalDate receiptDate = parseDate(columns[5], lineNumber);
 
         return switch (batchType) {
@@ -84,34 +87,54 @@ public class CsvStorageUtil {
 
     public static CsvLoadResult loadBatchesFromCsv(String filePath) throws IOException {
         Path path = Paths.get(filePath);
-        List<String> lines = Files.readAllLines(path);
 
-        List<StorageItem> validItems = new ArrayList<>();
-        List<CsvParseException> errorMessages = new ArrayList<>();
-
-        for (int lineNumber = 1; lineNumber < lines.size(); lineNumber++) {
-            try {
-                StorageItem item = parseLine(lines.get(lineNumber), lineNumber + 1);
-                validItems.add(item);
-            }
-            catch (CsvParseException e) {
-                errorMessages.add(e);
+        int lineCount = 0;
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            while (reader.readLine() != null) {
+                lineCount++;
             }
         }
 
-        return new CsvLoadResult(validItems, errorMessages);
+        StorageItem[] validItems = new StorageItem[lineCount];
+        CsvParseException[] errors = new CsvParseException[lineCount];
+
+        int validIndex = 0;
+        int errorIndex = 0;
+
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            int currentLineNumber = 1;
+
+            if ((line = reader.readLine()) != null) {
+                currentLineNumber++;
+
+                while ((line = reader.readLine()) != null) {
+                    try {
+                        StorageItem item = parseLine(line, currentLineNumber);
+                        validItems[validIndex++] = item;
+                    } catch (CsvParseException e) {
+                        errors[errorIndex++] = e;
+                    }
+                    currentLineNumber++;
+                }
+            }
+        }
+        return new CsvLoadResult(
+                Arrays.copyOf(validItems, validIndex),
+                Arrays.copyOf(errors, errorIndex)
+        );
+
     }
 
-    public static void saveBatchesToCsv(List<StorageItem> items, String filePath) throws IOException {
+    public static void saveBatchesToCsv(StorageItem[] items, String filePath) throws IOException {
         Path path = Paths.get(filePath);
-        List<String> lines = new ArrayList<>();
 
-        lines.add("Тип партии;Артикул;Наименование;Количество;Ячейка;Дата поступления;Страна;Таможенный код;Дата архивации;Причина архивации");
+        try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+            writer.write("Тип партии;Артикул;Наименование;Количество;Ячейка;Дата поступления;Страна;Таможенный код;Дата архивации;Причина архивации\n");
 
-        for (StorageItem item : items) {
-            lines.add(item.toCsvRow());
+            for (StorageItem item : items) {
+                writer.write(item.toCsvRow() + "\n");
+            }
         }
-
-        Files.write(path, lines);
     }
 }
