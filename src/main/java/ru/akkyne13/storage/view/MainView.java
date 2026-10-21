@@ -3,9 +3,11 @@ package ru.akkyne13.storage.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import ru.akkyne13.storage.view.component.HashTableView;
 
 public class MainView extends VBox {
     private final Button loadFromCsvButton = new Button("Загрузить из файла");
@@ -13,6 +15,7 @@ public class MainView extends VBox {
     private final Button editRecordButton = new Button("Изменить запись");
     private final Button addRecordButton = new Button("Добавить запись");
     private final StorageTableView recordsTable = new StorageTableView();
+    private final HashTableView hashCanvas = new HashTableView();
 
     HBox createTopButtonsBox() {
         return new HBox(loadFromCsvButton, saveToCsvButton);
@@ -32,7 +35,10 @@ public class MainView extends VBox {
         this.setSpacing(10);
         VBox.setVgrow(recordsTable, Priority.ALWAYS);
 
-        this.getChildren().addAll(topButtonsBox, recordsTable, bottomButtonsBox);
+        ScrollPane canvasScrollPane = new ScrollPane(hashCanvas); // Чтобы канвас можно было скроллить
+        canvasScrollPane.setPrefHeight(200);
+
+        this.getChildren().addAll(topButtonsBox, recordsTable, bottomButtonsBox, canvasScrollPane);
     }
 
     public Button getLoadFromCsvButton() {
@@ -54,4 +60,6 @@ public class MainView extends VBox {
     public StorageTableView getRecordsTable() {
         return recordsTable;
     }
+
+    public HashTableView getHashCanvas() { return hashCanvas; }
 }
