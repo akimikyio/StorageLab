@@ -3,6 +3,7 @@ package ru.akkyne13.storage.controller;
 import javafx.scene.control.Button;
 import ru.akkyne13.storage.structure.OpenAddressingHashMap;
 import ru.akkyne13.storage.structure.StorageMap;
+import ru.akkyne13.storage.task.GenerateDataTask;
 import ru.akkyne13.storage.util.AlertUtil;
 import ru.akkyne13.storage.exception.CsvParseException;
 import ru.akkyne13.storage.util.CsvLoadResult;
@@ -140,6 +141,42 @@ public class MainController {
         });
     }
 
+    private void setupGenerateButton() {
+        Button generateButton = view.getGenerateButton();
+
+        generateButton.setOnAction(event -> {
+            int count;
+            try {
+                count = Integer.parseInt(view.getGenerateCountField().getText());
+            } catch (NumberFormatException e) {
+                AlertUtil.showError("Ошибка", "Введите корректное число для генерации");
+                return;
+            }
+
+            generateButton.setDisable(true);
+
+            GenerateDataTask task = new GenerateDataTask(count, storage, false);
+            view.getProgressBar().progressProperty().bind(task.progressProperty());
+
+            task.setOnSucceeded(e -> {
+                refreshTable();
+                generateButton.setDisable(false);
+                view.getProgressBar().progressProperty().unbind();
+                view.getProgressBar().setProgress(0);
+                AlertUtil.showInfo("Успех", "Успешно сгенерировано " + count + " записей");
+            });
+
+            task.setOnFailed(e -> {
+                generateButton.setDisable(false);
+                AlertUtil.showError("Ошибка", "Сбой при генерации данных");
+            });
+
+            Thread backgroundThread = new Thread(task);
+            backgroundThread.setDaemon(true);
+            backgroundThread.start();
+        });
+    }
+
 
     private void setupListeners() {
         setupEditRecordsButtonState();
@@ -147,5 +184,6 @@ public class MainController {
         setupAddRecordButton();
         setupLoadFromCsvButton();
         setupSaveToCsvButton();
+        setupGenerateButton();
     }
 }
