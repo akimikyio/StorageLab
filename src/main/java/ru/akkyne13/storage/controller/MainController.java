@@ -1,6 +1,8 @@
 package ru.akkyne13.storage.controller;
 
 import javafx.scene.control.Button;
+import ru.akkyne13.storage.structure.OpenAddressingHashMap;
+import ru.akkyne13.storage.structure.StorageMap;
 import ru.akkyne13.storage.util.AlertUtil;
 import ru.akkyne13.storage.exception.CsvParseException;
 import ru.akkyne13.storage.util.CsvLoadResult;
@@ -11,14 +13,26 @@ import ru.akkyne13.storage.view.MainView;
 import ru.akkyne13.storage.view.StorageTableView;
 
 import java.io.IOException;
-import java.util.List;
 
 public class MainController {
     private final MainView view;
+    private final StorageMap<String, StorageItem> storage = new OpenAddressingHashMap<>();
 
     public MainController(MainView view) {
         this.view = view;
         setupListeners();
+    }
+
+    private void refreshTable() {
+        Object[] values = storage.getValuesSnapshot();
+        StorageItem[] items = new StorageItem[values.length];
+
+        for (int i = 0; i < values.length; i++) {
+            items[i] = (StorageItem) values[i];
+        }
+
+        view.getRecordsTable().getItems().setAll(items);
+        view.getHashCanvas().drawHashTable(storage.getKeysSnapshot(), storage.getLastProbes());
     }
 
     private void setupEditRecordsButtonState() {
@@ -49,7 +63,14 @@ public class MainController {
                 StorageItem updatedRecord = editDialog.showDialog();
 
                 if (updatedRecord != null) {
+                    if (!selectedItem.getSku().equals(updatedRecord.getSku())) {
+                        storage.delete(selectedItem.getSku());
+                    }
+                    storage.put(updatedRecord.getSku(), updatedRecord);
+
                     recordsTable.getItems().set(selectedIndex, updatedRecord);
+
+                    view.getHashCanvas().drawHashTable(storage.getKeysSnapshot(), storage.getLastProbes());
                 }
             }
         });
@@ -57,28 +78,33 @@ public class MainController {
 
     private void setupAddRecordButton() {
         Button addRecordButton = view.getAddRecordButton();
-        StorageTableView recordsTable = view.getRecordsTable();
 
         addRecordButton.setOnAction(event -> {
             BatchFormController batchFormController = new BatchFormController();
             StorageItem createdRecord = batchFormController.showDialog();
 
             if (createdRecord != null) {
-                recordsTable.getItems().add(createdRecord);
+                storage.put(createdRecord.getSku(), createdRecord);
+                refreshTable();
             }
         });
     }
 
     private void setupLoadFromCsvButton() {
         Button loadFromCsvButton = view.getLoadFromCsvButton();
-        StorageTableView recordsTable = view.getRecordsTable();
 
         loadFromCsvButton.setOnAction(event -> {
             try {
                 CsvLoadResult csvLoadResult = CsvStorageUtil.loadBatchesFromCsv("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
-                recordsTable.getItems().setAll(csvLoadResult.validItems());
+                storage.clear();
 
-                if (!csvLoadResult.errors().isEmpty()) {
+                for (StorageItem item : csvLoadResult.validItems()) {
+                    storage.put(item.getSku(), item);
+                }
+
+                refreshTable();
+
+                if (csvLoadResult.errors().length > 0) {
                     StringBuilder warningMessage = new StringBuilder();
                     warningMessage.append("Файл загружен частично. Пропущены битые строки:\n");
                     for (CsvParseException error : csvLoadResult.errors()) {
@@ -96,10 +122,15 @@ public class MainController {
 
     private void setupSaveToCsvButton() {
         Button saveToCsvButton = view.getSaveToCsvButton();
-        StorageTableView recordsTable = view.getRecordsTable();
 
         saveToCsvButton.setOnAction(event -> {
-            List<StorageItem> items = recordsTable.getItems();
+            Object[] values = storage.getValuesSnapshot();
+            StorageItem[] items = new StorageItem[values.length];
+
+            for (int i = 0; i < values.length; i++) {
+                items[i] = (StorageItem) values[i];
+            }
+
             try {
                 CsvStorageUtil.saveBatchesToCsv(items, "/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
                 AlertUtil.showInfo("Сохранение данных","Файл успешно сохранён");
