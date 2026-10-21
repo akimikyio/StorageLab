@@ -7,7 +7,8 @@ import javafx.scene.text.Font;
 
 public class HashTableView extends Canvas {
     private static final int CELL_SIZE = 60;
-    private static final int COLUMNS = 10;
+    private static final int COLUMNS = 20;
+    private static final int MAX_CELLS_TO_DRAW = 4000;
 
     public static final String DELETED_MARKER = "__DELETED__";
 
@@ -24,7 +25,10 @@ public class HashTableView extends Canvas {
             return;
         }
 
-        prepareCanvas(snapshot.length);
+        int cellsToDraw = Math.min(snapshot.length, MAX_CELLS_TO_DRAW);
+        boolean hasOverflow = snapshot.length > MAX_CELLS_TO_DRAW;
+
+        prepareCanvas(cellsToDraw, hasOverflow);
         GraphicsContext gc = getGraphicsContext2D();
 
         for (int i = 0; i < snapshot.length; i++) {
@@ -38,12 +42,25 @@ public class HashTableView extends Canvas {
             drawCellIndex(gc, x, y, i);
             drawCellContent(gc, x, y, cellValue);
         }
+
+        if (hasOverflow) {
+            gc.setFill(Color.RED);
+            gc.setFont(new Font(14));
+            String warningText = String.format("Показаны первые %d ячеек из %d. Остальные скрыты из-за лимита видеопамяти.", MAX_CELLS_TO_DRAW, snapshot.length);
+            gc.fillText(warningText, 10, getHeight() - 15);
+        }
     }
 
 
-    private void prepareCanvas(int snapshotLength) {
-        int rows = (int) Math.ceil((double) snapshotLength / COLUMNS);
-        setHeight(rows * CELL_SIZE);
+    private void prepareCanvas(int cellsToDraw, boolean hasOverflow) {
+        int rows = (int) Math.ceil((double) cellsToDraw / COLUMNS);
+        double newHeight = rows * CELL_SIZE;
+
+        if (hasOverflow) {
+            newHeight += 40;
+        }
+
+        setHeight(newHeight);
 
         GraphicsContext gc = getGraphicsContext2D();
         gc.clearRect(0, 0, getWidth(), getHeight());
