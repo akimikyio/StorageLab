@@ -8,6 +8,6 @@ public interface StorageMap<K, V> {
     boolean delete(K key);
     int size();
 
-    List<Integer> getLastProbes();
+    boolean[] getLastProbes();
     String[] getKeysSnapshot();
 }
