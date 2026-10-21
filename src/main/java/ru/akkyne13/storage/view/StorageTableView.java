@@ -2,6 +2,7 @@ package ru.akkyne13.storage.view;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -14,6 +15,10 @@ import java.util.List;
 
 public class StorageTableView extends TableView<StorageItem> {
     public StorageTableView() {
+
+        TableColumn<StorageItem, Integer> indexCol = createIndexCol();
+
+
         TableColumn<StorageItem, String> skuCol = new TableColumn<>("Артикул");
         skuCol.setCellValueFactory(new PropertyValueFactory<>("sku"));
 
@@ -69,9 +74,28 @@ public class StorageTableView extends TableView<StorageItem> {
             return new SimpleStringProperty(null);
         });
 
-        this.getColumns().addAll(List.of(skuCol, nameCol, amountCol,
+        this.getColumns().addAll(List.of(indexCol, skuCol, nameCol, amountCol,
                 cellCol, receiptDateCol, countryCol,
                 customsCodeCol, archiveDateCol, archiveReasonCol));
 
+    }
+
+    private static TableColumn<StorageItem, Integer> createIndexCol() {
+        TableColumn<StorageItem, Integer> indexCol = new TableColumn<>("№");
+        indexCol.setPrefWidth(40);
+        indexCol.setSortable(false);
+
+        indexCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null) {
+                    setText(null);
+                } else {
+                    setText(String.valueOf(getTableRow().getIndex() + 1));
+                }
+            }
+        });
+        return indexCol;
     }
 }
