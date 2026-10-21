@@ -18,7 +18,6 @@ public class StorageTableView extends TableView<StorageItem> {
 
         TableColumn<StorageItem, Integer> indexCol = createIndexCol();
 
-
         TableColumn<StorageItem, String> skuCol = new TableColumn<>("Артикул");
         skuCol.setCellValueFactory(new PropertyValueFactory<>("sku"));
 
