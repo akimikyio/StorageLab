@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 import static ru.akkyne13.storage.model.StorageItem.DATE_FORMATTER;
 
@@ -85,7 +86,7 @@ public class CsvStorageUtil {
     }
 
 
-    public static CsvLoadResult loadBatchesFromCsv(String filePath) throws IOException {
+    public static CsvLoadResult loadBatchesFromCsv(String filePath, BiConsumer<Integer, Integer> progressUpdater) throws IOException {
         Path path = Paths.get(filePath);
 
         int lineCount = 0;
@@ -109,11 +110,19 @@ public class CsvStorageUtil {
                 currentLineNumber++;
 
                 while ((line = reader.readLine()) != null) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        break;
+                    }
+
                     try {
                         StorageItem item = parseLine(line, currentLineNumber);
                         validItems[validIndex++] = item;
                     } catch (CsvParseException e) {
                         errors[errorIndex++] = e;
+                    }
+
+                    if (progressUpdater != null && currentLineNumber % 100 == 0) {
+                        progressUpdater.accept(currentLineNumber, lineCount);
                     }
                     currentLineNumber++;
                 }
