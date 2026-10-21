@@ -16,26 +16,32 @@ public class MainView extends VBox {
 
     private final Button editRecordButton = new Button("Изменить запись");
     private final Button addRecordButton = new Button("Добавить запись");
+    private final Button deleteRecordButton = new Button("Удалить запись");
 
     private final StorageTableView recordsTable = new StorageTableView();
     private final HashTableView hashCanvas = new HashTableView();
 
     private final TextField generateCountField = new TextField("100");
     private final Button generateButton = new Button("Сгенерировать записи");
+    private final Button cancelTaskButton = new Button("Отмена");
+    private final CheckBox delayCheckBox = new CheckBox("Задержка");
+    private final CheckBox animateCheckBox = new CheckBox("Анимация");
     private final ProgressBar progressBar = new ProgressBar(0);
 
     HBox createGenerateBox() {
         generateCountField.setPrefWidth(60);
         progressBar.setPrefWidth(150);
+        cancelTaskButton.setDisable(true);
 
-        HBox generateBox = new HBox(10, generateButton, generateCountField, progressBar);
+        VBox checksBox = new VBox(2, delayCheckBox, animateCheckBox);
+        HBox generateBox = new HBox(10, generateButton, generateCountField, cancelTaskButton, progressBar, checksBox);
         generateBox.setAlignment(Pos.CENTER_LEFT);
 
         return generateBox;
     }
 
-    HBox createEditAddBox() {
-        HBox editAddBox = new HBox(10, editRecordButton, addRecordButton);
+    HBox createEditAddDeleteBox() {
+        HBox editAddBox = new HBox(10, editRecordButton, deleteRecordButton, addRecordButton);
         editAddBox.setAlignment(Pos.CENTER_RIGHT);
 
         return editAddBox;
@@ -47,7 +53,7 @@ public class MainView extends VBox {
 
     HBox createBottomButtonsBox() {
         HBox generateBox = createGenerateBox();
-        HBox editAddBox = createEditAddBox();
+        HBox editAddBox = createEditAddDeleteBox();
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -115,5 +121,21 @@ public class MainView extends VBox {
 
     public ProgressBar getProgressBar() {
         return progressBar;
+    }
+
+    public Button getDeleteRecordButton() {
+        return deleteRecordButton;
+    }
+
+    public CheckBox getAnimateCheckBox() {
+        return animateCheckBox;
+    }
+
+    public CheckBox getDelayCheckBox() {
+        return delayCheckBox;
+    }
+
+    public Button getCancelTaskButton() {
+        return cancelTaskButton;
     }
 }
