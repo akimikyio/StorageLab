@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.akkyne13.storage.view.BatchFormView.TYPE_IMPORT;
+import static ru.akkyne13.storage.view.BatchFormView.TYPE_NORMAL;
+
 public class BatchFormController {
     private final BatchFormView view = new BatchFormView();
     private final Stage dialogStage = new Stage();
@@ -26,7 +29,7 @@ public class BatchFormController {
         batchTypeChooser.setOnAction((e) -> {
             String currentValue = batchTypeChooser.getValue();
 
-            if (currentValue.equals("Обычная партия")) {
+            if (currentValue.equals(TYPE_NORMAL)) {
                 view.setImportFieldsDisable(true);
             } else {
                 view.setImportFieldsDisable(false);
@@ -63,7 +66,7 @@ public class BatchFormController {
         String batchType = view.getBatchTypeChooser().getValue();
         Editable resultBatch;
 
-        if (batchType.equals("Импортная партия")) {
+        if (batchType.equals(TYPE_IMPORT)) {
             country = view.getCountry();
             customsCode = view.getCustomsCode();
 
@@ -126,12 +129,12 @@ public class BatchFormController {
         view.setReceiptDate(itemToEdit.getReceiptDate());
 
         if (itemToEdit instanceof ImportBatch) {
-            view.getBatchTypeChooser().setValue("Импортная партия");
+            view.getBatchTypeChooser().setValue(TYPE_IMPORT);
             view.setCountry(((ImportBatch) itemToEdit).getCountry());
             view.setCustomsCode(((ImportBatch) itemToEdit).getCustomsCode());
             view.setImportFieldsDisable(false);
         } else {
-            view.getBatchTypeChooser().setValue("Обычная партия");
+            view.getBatchTypeChooser().setValue(TYPE_NORMAL);
         }
 
         view.getBatchTypeChooser().setDisable(true);
