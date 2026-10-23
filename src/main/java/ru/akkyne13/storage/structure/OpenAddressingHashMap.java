@@ -43,17 +43,6 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
         }
     }
 
-
-    @Override
-    public synchronized boolean[] getLastProbes() {
-        boolean[] probes = new boolean[table.length];
-        for (int i = 0; i < lastProbesCount; i++) {
-            int visitedIndex = lastProbes[i];
-            probes[visitedIndex] = true;
-        }
-        return probes;
-    }
-
     private int hash(K key, int capacity) {
         return (key.hashCode() & 0x7fffffff) % capacity;
     }
@@ -176,29 +165,28 @@ public class OpenAddressingHashMap<K, V> implements StorageMap<K, V> {
     }
 
     @Override
-    public synchronized String[] getKeysSnapshot() {
-        String[] snapshot = new String[table.length];
+    public synchronized MapSnapshot getSnapshot() {
+        String[] keys = new String[table.length];
+        Object[] values = new Object[size];
+        boolean[] probes = new boolean[table.length];
+
+        for (int i = 0; i < lastProbesCount; i++) {
+            probes[lastProbes[i]] = true;
+        }
+
+        int valueIndex = 0;
         for (int i = 0; i < table.length; i++) {
             if (table[i] == null) {
-                snapshot[i] = null;
+                keys[i] = null;
             } else if (table[i].isDeleted) {
-                snapshot[i] = "__DELETED__";
+                keys[i] = MapSnapshot.DELETED_MARKER;
             } else {
-                snapshot[i] = table[i].key.toString();
+                keys[i] = table[i].key.toString();
+                values[valueIndex++] = table[i].value;
             }
         }
-        return snapshot;
+
+        return new MapSnapshot(keys, values, probes);
     }
 
-    @Override
-    public synchronized Object[] getValuesSnapshot() {
-        Object[] snapshot = new Object[size];
-        int i = 0;
-        for (Entry<K, V> entry : table) {
-            if (entry != null && !entry.isDeleted) {
-                snapshot[i++] = entry.value;
-            }
-        }
-        return snapshot;
-    }
 }

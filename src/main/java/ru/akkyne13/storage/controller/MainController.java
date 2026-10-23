@@ -2,6 +2,7 @@ package ru.akkyne13.storage.controller;
 
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
+import ru.akkyne13.storage.structure.MapSnapshot;
 import ru.akkyne13.storage.structure.OpenAddressingHashMap;
 import ru.akkyne13.storage.structure.StorageMap;
 import ru.akkyne13.storage.task.GenerateDataTask;
@@ -27,7 +28,8 @@ public class MainController {
     }
 
     private void refreshTable() {
-        Object[] values = storage.getValuesSnapshot();
+        MapSnapshot snapshot = storage.getSnapshot();
+        Object[] values = snapshot.values();
         StorageItem[] items = new StorageItem[values.length];
 
         for (int i = 0; i < values.length; i++) {
@@ -35,7 +37,7 @@ public class MainController {
         }
 
         view.getRecordsTable().getItems().setAll(items);
-        view.getHashCanvas().drawHashTable(storage.getKeysSnapshot(), storage.getLastProbes());
+        view.getHashCanvas().drawHashTable(snapshot.keys(), snapshot.probes());
     }
 
     private void setupEditRecordsButtonState() {
@@ -76,7 +78,8 @@ public class MainController {
 
                     recordsTable.getItems().set(selectedIndex, updatedRecord);
 
-                    view.getHashCanvas().drawHashTable(storage.getKeysSnapshot(), storage.getLastProbes());
+                    MapSnapshot snapshot = storage.getSnapshot();
+                    view.getHashCanvas().drawHashTable(snapshot.keys(), snapshot.probes());
                 }
             }
         });
@@ -139,7 +142,7 @@ public class MainController {
         Button saveToCsvButton = view.getSaveToCsvButton();
 
         saveToCsvButton.setOnAction(event -> {
-            Object[] values = storage.getValuesSnapshot();
+            Object[] values = storage.getSnapshot().values();
             StorageItem[] items = new StorageItem[values.length];
 
             for (int i = 0; i < values.length; i++) {

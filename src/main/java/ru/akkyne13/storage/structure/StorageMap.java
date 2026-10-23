@@ -8,7 +8,5 @@ public interface StorageMap<K, V> {
     void clear();
     int size();
 
-    boolean[] getLastProbes();
-    String[] getKeysSnapshot();
-    Object[] getValuesSnapshot();
+    MapSnapshot getSnapshot();
 }
