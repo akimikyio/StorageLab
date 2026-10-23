@@ -56,21 +56,4 @@ public class ImportBatch extends Batch {
 
         return errors;
     }
-
-    @Override
-    public String toCsvRow() {
-        String formattedReceiptDate = getReceiptDate() != null ? getReceiptDate().format(DATE_FORMATTER) : "";
-
-        return String.join(";",
-                "IMPORT",
-                getSku(),
-                getName(),
-                String.valueOf(getAmount()),
-                getCell(),
-                formattedReceiptDate,
-                country != null ? country : "",
-                customsCode != null ? customsCode : "",
-                "", ""
-        );
-    }
 }
