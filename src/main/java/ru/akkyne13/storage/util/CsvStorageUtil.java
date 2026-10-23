@@ -13,15 +13,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
-import static ru.akkyne13.storage.model.StorageItem.DATE_FORMATTER;
 
 public class CsvStorageUtil {
-    private CsvStorageUtil() {
-    } // класс утилитарный, объекты создавать нельзя
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy");
+    private static final Map<Class<? extends StorageItem>, CsvRowMapper<? extends StorageItem>> MAPPERS = new HashMap<>();
+
+    static {
+        MAPPERS.put(Batch.class, new BatchCsvMapper());
+        MAPPERS.put(ImportBatch.class, new ImportBatchCsvMapper());
+        MAPPERS.put(ArchiveBatch.class, new ArchiveBatchCsvMapper());
+    }
+
+    private CsvStorageUtil() { } // класс утилитарный, объекты создавать нельзя
+
+    @SuppressWarnings("unchecked")
+    public static <T extends StorageItem> String toCsvRow(T item) {
+        CsvRowMapper<T> mapper = (CsvRowMapper<T>) MAPPERS.get(item.getClass());
+        if (mapper == null) {
+            throw new IllegalArgumentException("Нет CSV маппера для класса: " + item.getClass().getSimpleName());
+        }
+        return mapper.map(item);
+    }
 
     private enum BatchType {
         NORMAL,
@@ -142,7 +161,7 @@ public class CsvStorageUtil {
             writer.write("Тип партии;Артикул;Наименование;Количество;Ячейка;Дата поступления;Страна;Таможенный код;Дата архивации;Причина архивации\n");
 
             for (StorageItem item : items) {
-                writer.write(item.toCsvRow() + "\n");
+                writer.write(toCsvRow(item) + "\n");
             }
         }
     }
