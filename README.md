@@ -18,7 +18,7 @@
 - `model/` — сущности предметной области (`StorageItem`, `Batch`, `ImportBatch`, `ArchiveBatch`, `Editable`).
 - `view/` — визуальные компоненты JavaFX без бизнес-логики (`MainView`, `BatchFormView`, `StorageTableView`).
 - `controller/` — связующее звено, обработка событий и управление состоянием (`MainController`, `BatchFormController`).
-- `util/` — утилиты для работы с файловой системой (`CsvStorageUtil`) и диалоговыми окнами (`AlertUtil`).
+- `util/` — утилиты для работы с файловой системой (`CsvStorageUtil`, `CsvLoadResult`) и диалоговыми окнами (`AlertUtil`).
 - `exception/` — кастомные классы ошибок.
 
 ## Стек технологий

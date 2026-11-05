@@ -9,7 +9,4 @@ public interface StorageItem {
     int getAmount();
     String getCell();
     LocalDate getReceiptDate();
-
-    DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yy");
-    String toCsvRow();
 }

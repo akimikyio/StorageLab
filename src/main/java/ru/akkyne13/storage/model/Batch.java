@@ -93,19 +93,4 @@ public class Batch implements Editable, StorageItem {
 
         return errors;
     }
-
-    @Override
-    public String toCsvRow() {
-        String formattedReceiptDate = receiptDate != null ? receiptDate.format(DATE_FORMATTER) : "";
-
-        return String.join(";",
-                "NORMAL",
-                sku,
-                name,
-                String.valueOf(amount),
-                cell,
-                formattedReceiptDate,
-                "", "", "", ""
-        );
-    }
 }

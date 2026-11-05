@@ -9,6 +9,9 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDate;
 
 public class BatchFormView extends VBox {
+    public static final String TYPE_NORMAL = "Обычная партия";
+    public static final String TYPE_IMPORT = "Импортная партия";
+
     // Основные поля
     private final TextField skuField = new TextField();
     private final TextField nameField = new TextField();
@@ -57,8 +60,8 @@ public class BatchFormView extends VBox {
 
 
     private void createBatchTypeChooser() {
-        batchTypeChooser.getItems().addAll("Обычная партия", "Импортная партия");
-        batchTypeChooser.setValue("Обычная партия");
+        batchTypeChooser.getItems().addAll(TYPE_NORMAL, TYPE_IMPORT);
+        batchTypeChooser.setValue(TYPE_NORMAL);
     }
 
     private HBox createButtonBox() {
