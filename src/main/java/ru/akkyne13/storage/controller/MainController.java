@@ -2,6 +2,8 @@ package ru.akkyne13.storage.controller;
 
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
+import javafx.stage.FileChooser;
+import ru.akkyne13.storage.io.*;
 import ru.akkyne13.storage.structure.MapSnapshot;
 import ru.akkyne13.storage.structure.OpenAddressingHashMap;
 import ru.akkyne13.storage.structure.StorageMap;
@@ -16,14 +18,24 @@ import ru.akkyne13.storage.model.StorageItem;
 import ru.akkyne13.storage.view.MainView;
 import ru.akkyne13.storage.view.StorageTableView;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainController {
     private final MainView view;
     private final StorageMap<String, StorageItem> storage = new OpenAddressingHashMap<>();
+    private final Map<String, Serializer<StorageData>> serializers = new HashMap<>();
+
 
     public MainController(MainView view) {
         this.view = view;
+
+        serializers.put("json", new JsonSerializer());
+        serializers.put("bin", new BinSerializer());
+        serializers.put("csv", new CsvSerializer());
+
         setupListeners();
     }
 
