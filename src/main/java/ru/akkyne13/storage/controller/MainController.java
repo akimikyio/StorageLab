@@ -138,8 +138,41 @@ public class MainController {
         });
     }
 
-    private void setupSaveToCsvButton() {
-        Button saveToCsvButton = view.getSaveToCsvButton();
+    private FileChooser setupFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Выберете файл");
+
+        FileChooser.ExtensionFilter jsonFilter =
+                new FileChooser.ExtensionFilter("JSON", "*.json");
+        FileChooser.ExtensionFilter binFilter =
+                new FileChooser.ExtensionFilter("Binary", "*.bin");
+        FileChooser.ExtensionFilter csvFilter =
+                new FileChooser.ExtensionFilter("CSV", "*.csv");
+        FileChooser.ExtensionFilter allFilesFilter =
+                new FileChooser.ExtensionFilter("Все файлы", "*.*");
+
+
+        fileChooser.getExtensionFilters().addAll(jsonFilter, binFilter, csvFilter, allFilesFilter);
+
+        return fileChooser;
+    }
+
+    private String getExtension(File file) {
+        String fileName = file.getName();
+        String extension = "";
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0) {
+            extension = fileName.substring(dotIndex + 1).toLowerCase();
+        }
+
+        return extension;
+    }
+
+
+    private void setupExportButton() {
+        Button saveToCsvButton = view.getExportButton();
+        FileChooser fileChooser = setupFileChooser();
+
 
         saveToCsvButton.setOnAction(event -> {
             Object[] values = storage.getSnapshot().values();
