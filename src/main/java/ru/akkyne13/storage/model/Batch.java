@@ -1,5 +1,6 @@
 package ru.akkyne13.storage.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,11 @@ public class Batch implements Editable, StorageItem {
     private int amount;
     private String cell;
     private LocalDate receiptDate;
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    public Batch() { }
 
     public Batch(String sku, String name, int amount, String cell, LocalDate receiptDate) {
         this.sku = sku;

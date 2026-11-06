@@ -7,6 +7,8 @@ public class ImportBatch extends Batch {
     private String country;
     private String customsCode;
 
+    public ImportBatch() { }
+
     public ImportBatch(String sku, String name, int amount, String cell, LocalDate receiptDate, String country, String customsCode) {
         super(sku, name, amount, cell, receiptDate);
         this.country = country;
