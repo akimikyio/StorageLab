@@ -6,6 +6,8 @@ import ru.akkyne13.storage.model.StorageItem;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class StorageData implements Serializable {
     @Serial
@@ -52,5 +54,17 @@ public class StorageData implements Serializable {
 
     public void setErrors(CsvParseException[] errors) {
         this.errors = errors;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        StorageData that = (StorageData) o;
+        return schemaVersion == that.schemaVersion && Objects.deepEquals(items, that.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(schemaVersion, Arrays.hashCode(items));
     }
 }

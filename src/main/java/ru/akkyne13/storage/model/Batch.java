@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Batch implements Editable, StorageItem {
     private String sku;
@@ -98,5 +99,17 @@ public class Batch implements Editable, StorageItem {
         }
 
         return errors;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Batch batch = (Batch) o;
+        return amount == batch.amount && Objects.equals(sku, batch.sku) && Objects.equals(name, batch.name) && Objects.equals(cell, batch.cell) && Objects.equals(receiptDate, batch.receiptDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sku, name, amount, cell, receiptDate);
     }
 }
