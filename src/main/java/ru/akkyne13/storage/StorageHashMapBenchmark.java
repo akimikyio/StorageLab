@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
-public class StorageBenchmark {
+public class StorageHashMapBenchmark {
     public static void main(String[] args) {
         warmup();
 
