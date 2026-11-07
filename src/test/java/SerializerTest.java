@@ -49,7 +49,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("json_roundtrip: Объекты должны совпадать после JSON сериализации")
-    void json_roundtrip_test() throws IOException {
+    void jsonRoundtripTest() throws IOException {
         Path file = tempDir.resolve("test.json");
         jsonSerializer.save(dummyData, file);
 
@@ -60,7 +60,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("bin_roundtrip: Объекты должны совпадать после бинарной сериализации")
-    void bin_roundtrip_test() throws IOException {
+    void binRoundtripTest() throws IOException {
         Path file = tempDir.resolve("test.bin");
         binSerializer.save(dummyData, file);
 
@@ -71,7 +71,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("empty_data_roundtrip: Пустой массив должен сериализоваться без ошибок")
-    void empty_data_roundtrip_test() throws IOException {
+    void emptyRoundtripTest() throws IOException {
         Path file = tempDir.resolve("empty.json");
         StorageData emptyData = new StorageData(1, new StorageItem[0]);
 
@@ -83,7 +83,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("load_valid_json: Поля загруженного файла должны совпадать с ожидаемыми")
-    void load_valid_json_from_resources_test() throws Exception {
+    void loadValidJsonFromResourcesTest() throws Exception {
         Path file = getResourcePath("/valid-data.json");
 
         StorageData actualData = jsonSerializer.load(file);
@@ -99,7 +99,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("load_missing_file: Чтение несуществующего файла должно вызывать IOException")
-    void load_missing_file_throws_io_exception_test() {
+    void loadMissingFileThrowsIoExceptionTest() {
         Path missingFile = tempDir.resolve("not_exists.json");
 
         assertThrows(IOException.class, () -> jsonSerializer.load(missingFile));
@@ -107,7 +107,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("load_broken_json: Сломанный JSON должен вызывать IOException при парсинге")
-    void load_broken_json_throws_exception_test() throws Exception {
+    void loadBrokenJsonThrowsExceptionTest() throws Exception {
         Path file = getResourcePath("/broken-syntax.json");
 
         assertThrows(IOException.class, () -> jsonSerializer.load(file));
@@ -115,7 +115,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("load_broken_bin: Ложные данные должны вызывать IOException при бинарной десериализации")
-    void load_broken_bin_throws_exception_test() throws Exception {
+    void loadBrokenBinThrowsExceptionTest() throws Exception {
         Path file = getResourcePath("/broken.bin");
 
         assertThrows(IOException.class, () -> binSerializer.load(file));
@@ -123,7 +123,7 @@ class SerializerTest {
 
     @Test
     @DisplayName("json_unknown_subtype: Неизвестный тип партии должен ронять парсер с IOException")
-    void json_unknown_subtype_throws_exception_test() throws Exception {
+    void jsonUnknownSubtypeThrowsExceptionTest() throws Exception {
         Path file = getResourcePath("/non-existing-type.json");
 
         assertThrows(IOException.class, () -> jsonSerializer.load(file));
