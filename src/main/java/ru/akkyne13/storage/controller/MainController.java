@@ -164,7 +164,7 @@ public class MainController {
 
     private FileChooser setupFileChooser() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Выберете файл");
+        fileChooser.setTitle("Выберите файл");
 
         FileChooser.ExtensionFilter jsonFilter =
                 new FileChooser.ExtensionFilter("JSON", "*.json");
