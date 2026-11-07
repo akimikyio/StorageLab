@@ -5,15 +5,17 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class JsonSerializer implements Serializer<StorageData> {
     private final ObjectMapper mapper;
 
     public JsonSerializer() {
-        this.mapper = new ObjectMapper();
-        this.mapper.registerModule(new JavaTimeModule());
-        this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Override
@@ -23,11 +25,15 @@ public class JsonSerializer implements Serializer<StorageData> {
 
     @Override
     public void save(StorageData data, Path file) throws IOException {
-        mapper.writeValue(file.toFile(), data);
+        try (var writer = Files.newBufferedWriter(file)) {
+            mapper.writeValue(writer, data);
+        }
     }
 
     @Override
     public StorageData load(Path file) throws IOException {
-        return mapper.readValue(file.toFile(), StorageData.class);
+        try (var reader = Files.newBufferedReader(file)) {
+            return mapper.readValue(reader, StorageData.class);
+        }
     }
 }
