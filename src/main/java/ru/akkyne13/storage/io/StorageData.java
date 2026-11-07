@@ -49,7 +49,7 @@ public class StorageData implements Serializable {
     }
 
     public CsvParseException[] getErrors() {
-        return errors;
+        return errors != null ? errors : new CsvParseException[0];
     }
 
     public void setErrors(CsvParseException[] errors) {
