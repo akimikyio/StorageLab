@@ -242,7 +242,11 @@ public class MainController {
         task.setOnSucceeded(e -> cleanupTaskUI());
         task.setOnFailed(e -> {
             cleanupTaskUI();
-            AlertUtil.showError("Сбой", "Произошла ошибка при выполнении фоновой задачи.");
+            Throwable ex = task.getException();
+            String details = (ex != null && ex.getMessage() != null)
+                    ? ex.getMessage()
+                    : "Неизвестная ошибка при выполнении задачи.";
+            AlertUtil.showError("Ошибка выполнения", "Не удалось выполнить задачу:\n" + details);
         });
         task.setOnCancelled(e -> cleanupTaskUI());
     }
@@ -263,6 +267,10 @@ public class MainController {
             int count;
             try {
                 count = Integer.parseInt(view.getGenerateCountField().getText());
+                if (count <= 0) {
+                    AlertUtil.showError("Ошибка", "Количество записей должно быть больше нуля");
+                    return;
+                }
             } catch (NumberFormatException e) {
                 AlertUtil.showError("Ошибка", "Введите корректное число для генерации");
                 return;
