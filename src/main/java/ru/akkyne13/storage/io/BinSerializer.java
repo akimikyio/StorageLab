@@ -30,6 +30,8 @@ public class BinSerializer implements Serializer<StorageData> {
             throw new IOException("Файл содержит неверный формат данных");
         } catch (ClassNotFoundException e) {
             throw new IOException("Ошибка структуры данных при чтении файла", e);
+        } catch (StreamCorruptedException | EOFException e) {
+            throw new IOException("Бинарный файл повреждён", e);
         }
     }
 }
