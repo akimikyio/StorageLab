@@ -12,6 +12,7 @@ import java.util.Objects;
 public class StorageData implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+    public static final int CURRENT_VERSION = 3;
 
     private int schemaVersion = 1;
     private StorageItem[] items;
