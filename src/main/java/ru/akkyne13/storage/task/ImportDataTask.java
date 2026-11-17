@@ -1,41 +1,44 @@
 package ru.akkyne13.storage.task;
 
 import javafx.concurrent.Task;
+import ru.akkyne13.storage.io.Serializer;
+import ru.akkyne13.storage.io.StorageData;
 import ru.akkyne13.storage.model.StorageItem;
 import ru.akkyne13.storage.structure.StorageMap;
-import ru.akkyne13.storage.util.CsvLoadResult;
-import ru.akkyne13.storage.util.CsvStorageUtil;
 
-public class LoadCsvTask extends Task<CsvLoadResult> {
-    private final String filePath;
+import java.nio.file.Path;
+
+public class ImportDataTask extends Task<StorageData> {
+    private final Path file;
+    private final Serializer<StorageData> serializer;
     private final StorageMap<String, StorageItem> storage;
 
-    public LoadCsvTask(String filePath, StorageMap<String, StorageItem> storage) {
-        this.filePath = filePath;
+    public ImportDataTask(Path file, StorageMap<String, StorageItem> storage, Serializer<StorageData> serializer) {
+        this.file = file;
         this.storage = storage;
+        this.serializer = serializer;
     }
 
     @Override
-    protected CsvLoadResult call() throws Exception {
+    protected StorageData call() throws Exception {
         updateMessage("Чтение файла...");
+        updateProgress(-1, 100);
 
-        CsvLoadResult result = CsvStorageUtil.loadBatchesFromCsv(filePath, (current, total) -> {
+        StorageData data = serializer.load(file, (current, total) -> {
             updateProgress(current, total);
             updateMessage(String.format("Чтение: %d / %d", current, total));
         });
 
-        if (isCancelled()) {
+        if (isCancelled() || data == null) {
             return null;
         }
 
         updateMessage("Обновление структуры...");
         storage.clear();
 
-        StorageItem[] items = result.validItems();
+        StorageItem[] items = data.getItems();
         for (int i = 0; i < items.length; i++) {
-            if (isCancelled()) {
-                break;
-            }
+            if (isCancelled()) break;
             storage.put(items[i].getSku(), items[i]);
 
             if (i % 100 == 0 || i == items.length - 1) {
@@ -43,6 +46,6 @@ public class LoadCsvTask extends Task<CsvLoadResult> {
             }
         }
 
-        return result;
+        return data;
     }
 }

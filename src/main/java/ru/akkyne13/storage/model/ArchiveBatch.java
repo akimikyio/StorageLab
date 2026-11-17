@@ -1,5 +1,6 @@
 package ru.akkyne13.storage.model;
 
+import java.io.Serial;
 import java.time.LocalDate;
 
 public record ArchiveBatch(
@@ -9,7 +10,11 @@ public record ArchiveBatch(
         String cell,
         LocalDate receiptDate,
         LocalDate archiveDate,
-        String archiveReason) implements StorageItem {
+        String archiveReason
+) implements StorageItem {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // Getters
     @Override

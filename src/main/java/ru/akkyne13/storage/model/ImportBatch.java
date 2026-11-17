@@ -2,10 +2,13 @@ package ru.akkyne13.storage.model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 public class ImportBatch extends Batch {
     private String country;
     private String customsCode;
+
+    public ImportBatch() { }
 
     public ImportBatch(String sku, String name, int amount, String cell, LocalDate receiptDate, String country, String customsCode) {
         super(sku, name, amount, cell, receiptDate);
@@ -55,5 +58,18 @@ public class ImportBatch extends Batch {
         }
 
         return errors;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ImportBatch that = (ImportBatch) o;
+        return Objects.equals(country, that.country) && Objects.equals(customsCode, that.customsCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), country, customsCode);
     }
 }

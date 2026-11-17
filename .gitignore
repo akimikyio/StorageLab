@@ -41,3 +41,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/benchmark_results/data.bin
+/benchmark_results/data.csv
+/benchmark_results/data.json
+/benchmark_results/

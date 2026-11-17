@@ -2,28 +2,37 @@ package ru.akkyne13.storage.controller;
 
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
+import javafx.stage.FileChooser;
+import ru.akkyne13.storage.io.*;
 import ru.akkyne13.storage.structure.MapSnapshot;
 import ru.akkyne13.storage.structure.OpenAddressingHashMap;
 import ru.akkyne13.storage.structure.StorageMap;
 import ru.akkyne13.storage.task.GenerateDataTask;
-import ru.akkyne13.storage.task.LoadCsvTask;
+import ru.akkyne13.storage.task.ImportDataTask;
 import ru.akkyne13.storage.util.AlertUtil;
-import ru.akkyne13.storage.exception.CsvParseException;
-import ru.akkyne13.storage.util.CsvLoadResult;
-import ru.akkyne13.storage.util.CsvStorageUtil;
 import ru.akkyne13.storage.model.Editable;
 import ru.akkyne13.storage.model.StorageItem;
 import ru.akkyne13.storage.view.MainView;
 import ru.akkyne13.storage.view.StorageTableView;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainController {
     private final MainView view;
     private final StorageMap<String, StorageItem> storage = new OpenAddressingHashMap<>();
+    private final Map<String, Serializer<StorageData>> serializers = new HashMap<>();
+
 
     public MainController(MainView view) {
         this.view = view;
+
+        serializers.put("json", new JsonSerializer());
+        serializers.put("bin", new BinSerializer());
+        serializers.put("csv", new CsvSerializer());
+
         setupListeners();
     }
 
@@ -113,54 +122,117 @@ public class MainController {
         });
     }
 
-    private void setupLoadFromCsvButton() {
-        Button loadFromCsvButton = view.getLoadFromCsvButton();
+    private void setupImportButon() {
+        Button importButton = view.getImportButton();
+        FileChooser fileChooser = setupFileChooser();
 
-        loadFromCsvButton.setOnAction(event -> {
-            LoadCsvTask task = new LoadCsvTask("/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv", storage);
-            bindTaskToUI(task);
+        importButton.setOnAction(event -> {
+            File file = fileChooser.showOpenDialog(view.getScene().getWindow());
+            if (file != null) {
+                String extension = getExtension(file);
 
-            task.addEventHandler(javafx.concurrent.WorkerStateEvent.WORKER_STATE_SUCCEEDED, e -> {
-                CsvLoadResult result = task.getValue();
-                if (result != null && result.errors().length > 0) {
-                    StringBuilder warningMessage = new StringBuilder();
-                    warningMessage.append("Файл загружен частично. Пропущены битые строки:\n");
-                    for (CsvParseException error : result.errors()) {
-                        warningMessage.append(error.getMessage()).append("\n");
-                    }
-                    AlertUtil.showWarning("Ошибки чтения", warningMessage.toString());
+                Serializer<StorageData> serializer = serializers.get(extension);
+
+                if (serializer == null) {
+                    AlertUtil.showError("Ошибка импорта", "Формат ." + extension + " не поддерживается.");
+                    return;
                 }
-            });
 
-            Thread backgroundThread = new Thread(task);
-            backgroundThread.setDaemon(true);
-            backgroundThread.start();
+                ImportDataTask task = new ImportDataTask(file.toPath(), storage, serializer);
+                bindTaskToUI(task);
+
+                task.addEventHandler(javafx.concurrent.WorkerStateEvent.WORKER_STATE_SUCCEEDED, e -> {
+                    StorageData result = task.getValue();
+
+                    if (result != null && result.getErrors() != null && result.getErrors().length > 0) {
+                        StringBuilder warningMessage = new StringBuilder("Файл загружен частично. Пропущены битые строки:\n");
+                        for (var error : result.getErrors()) {
+                            warningMessage.append(error.getMessage()).append("\n");
+                        }
+                        AlertUtil.showWarning("Ошибки чтения", warningMessage.toString());
+                    } else {
+                        AlertUtil.showInfo("Загрузка", "Данные успешно импортированы!");
+                    }
+                });
+
+                Thread backgroundThread = new Thread(task);
+                backgroundThread.setDaemon(true);
+                backgroundThread.start();
+            }
         });
     }
 
-    private void setupSaveToCsvButton() {
-        Button saveToCsvButton = view.getSaveToCsvButton();
+    private FileChooser setupFileChooser() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Выберите файл");
+
+        FileChooser.ExtensionFilter jsonFilter =
+                new FileChooser.ExtensionFilter("JSON", "*.json");
+        FileChooser.ExtensionFilter binFilter =
+                new FileChooser.ExtensionFilter("Binary", "*.bin");
+        FileChooser.ExtensionFilter csvFilter =
+                new FileChooser.ExtensionFilter("CSV", "*.csv");
+        FileChooser.ExtensionFilter allFilesFilter =
+                new FileChooser.ExtensionFilter("Все файлы", "*.*");
+
+
+        fileChooser.getExtensionFilters().addAll(jsonFilter, binFilter, csvFilter, allFilesFilter);
+
+        return fileChooser;
+    }
+
+    private String getExtension(File file) {
+        String fileName = file.getName();
+        String extension = "";
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0) {
+            extension = fileName.substring(dotIndex + 1).toLowerCase();
+        }
+
+        return extension;
+    }
+
+
+    private void setupExportButton() {
+        Button saveToCsvButton = view.getExportButton();
+        FileChooser fileChooser = setupFileChooser();
+
 
         saveToCsvButton.setOnAction(event -> {
-            Object[] values = storage.getSnapshot().values();
-            StorageItem[] items = new StorageItem[values.length];
+            File file = fileChooser.showSaveDialog(view.getScene().getWindow());
 
-            for (int i = 0; i < values.length; i++) {
-                items[i] = (StorageItem) values[i];
-            }
+            if (file != null) {
+                Object[] values = storage.getSnapshot().values();
+                StorageItem[] items = new StorageItem[values.length];
 
-            try {
-                CsvStorageUtil.saveBatchesToCsv(items, "/home/Gleb/IdeaProjects/Storage/src/main/java/data.csv");
-                AlertUtil.showInfo("Сохранение данных","Файл успешно сохранён");
-            } catch (IOException e) {
-                AlertUtil.showError("Ошибка сохранения файла", "Не удалось сохранить файл");
+                for (int i = 0; i < values.length; i++) {
+                    items[i] = (StorageItem) values[i];
+                }
+
+                StorageData data = new StorageData(1, items);
+                String extension = getExtension(file);
+
+                Serializer<StorageData> serializer = serializers.get(extension);
+
+                if (serializer == null) {
+                    AlertUtil.showError("Ошибка экспорта", "Формат ." + extension + " не поддерживается.");
+                    return;
+                }
+
+                try {
+                    serializer.save(data, file.toPath());
+                    AlertUtil.showInfo("Сохранение данных","Файл успешно сохранён");
+                } catch (IOException e) {
+                    AlertUtil.showError("Ошибка сохранения файла", "Не удалось сохранить файл: " + e.getMessage());
+                }
+
             }
         });
     }
 
     private void bindTaskToUI(Task<?> task) {
         view.getGenerateButton().setDisable(true);
-        view.getLoadFromCsvButton().setDisable(true);
+        view.getImportButton().setDisable(true);
         view.getCancelTaskButton().setDisable(false);
 
         view.getProgressBar().progressProperty().bind(task.progressProperty());
@@ -170,14 +242,18 @@ public class MainController {
         task.setOnSucceeded(e -> cleanupTaskUI());
         task.setOnFailed(e -> {
             cleanupTaskUI();
-            AlertUtil.showError("Сбой", "Произошла ошибка при выполнении фоновой задачи.");
+            Throwable ex = task.getException();
+            String details = (ex != null && ex.getMessage() != null)
+                    ? ex.getMessage()
+                    : "Неизвестная ошибка при выполнении задачи.";
+            AlertUtil.showError("Ошибка выполнения", "Не удалось выполнить задачу:\n" + details);
         });
         task.setOnCancelled(e -> cleanupTaskUI());
     }
 
     private void cleanupTaskUI() {
         view.getGenerateButton().setDisable(false);
-        view.getLoadFromCsvButton().setDisable(false);
+        view.getImportButton().setDisable(false);
         view.getCancelTaskButton().setDisable(true);
         view.getProgressBar().progressProperty().unbind();
         view.getProgressBar().setProgress(0);
@@ -191,6 +267,10 @@ public class MainController {
             int count;
             try {
                 count = Integer.parseInt(view.getGenerateCountField().getText());
+                if (count <= 0) {
+                    AlertUtil.showError("Ошибка", "Количество записей должно быть больше нуля");
+                    return;
+                }
             } catch (NumberFormatException e) {
                 AlertUtil.showError("Ошибка", "Введите корректное число для генерации");
                 return;
@@ -216,8 +296,8 @@ public class MainController {
         setupEditRecordButton();
         setupAddRecordButton();
         setupDeleteRecordButton();
-        setupLoadFromCsvButton();
-        setupSaveToCsvButton();
+        setupImportButon();
+        setupExportButton();
         setupGenerateButton();
     }
 }
