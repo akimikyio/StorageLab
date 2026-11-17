@@ -2,6 +2,7 @@ package ru.akkyne13.storage.model;
 
 import java.io.Serial;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,17 +14,27 @@ public class Batch implements Editable, StorageItem {
     private String cell;
     private LocalDate receiptDate;
 
+    private String note; // v2 field
+    private LocalDateTime updatedAt; // v3 field
+
     @Serial
     private static final long serialVersionUID = 1L;
 
     public Batch() { }
 
     public Batch(String sku, String name, int amount, String cell, LocalDate receiptDate) {
+        this(sku, name, amount, cell, receiptDate, "",
+                receiptDate != null ? receiptDate.atStartOfDay() : null);
+    }
+
+    public Batch(String sku, String name, int amount, String cell, LocalDate receiptDate, String note, LocalDateTime updatedAt) {
         this.sku = sku;
         this.name = name;
         this.amount = amount;
         this.cell = cell;
         this.receiptDate = receiptDate;
+        this.note = note;
+        this.updatedAt = updatedAt;
     }
 
 
@@ -105,11 +116,32 @@ public class Batch implements Editable, StorageItem {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Batch batch = (Batch) o;
-        return amount == batch.amount && Objects.equals(sku, batch.sku) && Objects.equals(name, batch.name) && Objects.equals(cell, batch.cell) && Objects.equals(receiptDate, batch.receiptDate);
+        return amount == batch.amount && Objects.equals(sku, batch.sku)
+                && Objects.equals(name, batch.name) && Objects.equals(cell, batch.cell)
+                && Objects.equals(receiptDate, batch.receiptDate)
+                && Objects.equals(note, batch.note) && Objects.equals(updatedAt, batch.updatedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sku, name, amount, cell, receiptDate);
+        return Objects.hash(sku, name, amount, cell, receiptDate, note, updatedAt);
+    }
+
+    @Override
+    public String getNote() {
+        return note;
+    }
+
+    @Override
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

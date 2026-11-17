@@ -1,6 +1,7 @@
 package ru.akkyne13.storage.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,7 +12,13 @@ public class ImportBatch extends Batch {
     public ImportBatch() { }
 
     public ImportBatch(String sku, String name, int amount, String cell, LocalDate receiptDate, String country, String customsCode) {
-        super(sku, name, amount, cell, receiptDate);
+        this(sku, name, amount, cell, receiptDate, country, customsCode, "",
+                receiptDate != null ? receiptDate.atStartOfDay() : null);
+    }
+
+    public ImportBatch(String sku, String name, int amount, String cell, LocalDate receiptDate,
+                       String country, String customsCode, String note, LocalDateTime updatedAt) {
+        super(sku, name, amount, cell, receiptDate, note, updatedAt);
         this.country = country;
         this.customsCode = customsCode;
     }
