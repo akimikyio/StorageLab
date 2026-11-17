@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -23,4 +24,7 @@ public interface StorageItem extends Serializable {
     int getAmount();
     String getCell();
     LocalDate getReceiptDate();
+
+    String getNote();
+    LocalDateTime getUpdatedAt();
 }
